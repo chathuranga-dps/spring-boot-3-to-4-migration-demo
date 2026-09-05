@@ -208,6 +208,18 @@ Role:    USER
 curl -u demo:demo123 http://localhost:8080/api/v1/employees
 ```
 
+## Swagger / OpenAPI
+
+Spring Boot 3 uses `springdoc-openapi` 2.x.
+
+- Swagger UI: `http://localhost:8080/swagger-ui.html`
+- OpenAPI JSON: `http://localhost:8080/v3/api-docs`
+- Protected Employee API operations can be executed from Swagger UI by selecting
+  **Authorize** and entering the HTTP Basic credentials documented above.
+
+MIGRATION-DEMO:
+Swagger/OpenAPI is included so the migration can demonstrate the springdoc-openapi 2.x to 3.x upgrade required for Spring Boot 4.
+
 ## API Endpoints
 
 All `/api/**` endpoints require authentication.
@@ -745,6 +757,7 @@ spring-boot-3-to-4-migration-demo/
 │   │
 │   ├── config/
 │   │   ├── JacksonConfig.java                  # Jackson 2 configuration (MIGRATION-DEMO)
+│   │   ├── OpenApiConfig.java                  # Swagger/OpenAPI and HTTP Basic scheme
 │   │   └── SecurityConfig.java                 # Spring Security 6 config (MIGRATION-DEMO)
 │   │
 │   ├── health/
