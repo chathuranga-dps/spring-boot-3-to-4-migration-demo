@@ -57,13 +57,6 @@
             <artifactId>spring-boot-starter-actuator</artifactId>
         </dependency>
 
-        <!-- PostgreSQL JDBC Driver for Testcontainers integration testing -->
-        <dependency>
-            <groupId>org.postgresql</groupId>
-            <artifactId>postgresql</artifactId>
-            <scope>test</scope>
-        </dependency>
-
         <!-- H2 database for local runtime and tests -->
         <dependency>
             <groupId>com.h2database</groupId>
