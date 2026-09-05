@@ -5,12 +5,8 @@ import com.example.migrationdemo.repository.EmployeeRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.test.context.DynamicPropertyRegistry;
-import org.springframework.test.context.DynamicPropertySource;
-import org.testcontainers.containers.PostgreSQLContainer;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
+import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
+import org.springframework.test.context.ActiveProfiles;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -20,28 +16,12 @@ import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * MIGRATION-DEMO:
- * Integration test using Testcontainers for PostgreSQL.
- * This test demonstrates database compatibility and will be important
- * for validating database and Hibernate queries during Spring Boot 4 migration.
- *
- * Note: This test will be skipped if Docker is not available.
+ * Repository integration tests use H2 to match the application runtime database
+ * and validate Hibernate / Spring Data compatibility in Spring Boot 4.
  */
-@Testcontainers(disabledWithoutDocker = true)
 @DataJpaTest
+@ActiveProfiles("test")
 class EmployeeRepositoryIntegrationTest {
-
-    @Container
-    static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:16")
-            .withDatabaseName("test_db")
-            .withUsername("test_user")
-            .withPassword("test_pass");
-
-    @DynamicPropertySource
-    static void configureProperties(DynamicPropertyRegistry registry) {
-        registry.add("spring.datasource.url", postgres::getJdbcUrl);
-        registry.add("spring.datasource.username", postgres::getUsername);
-        registry.add("spring.datasource.password", postgres::getPassword);
-    }
 
     @Autowired
     private EmployeeRepository employeeRepository;
@@ -83,6 +63,23 @@ class EmployeeRepositoryIntegrationTest {
 
         assertTrue(found.isPresent());
         assertEquals("Jane", found.get().getFirstName());
+    }
+
+    @Test
+    void testFindByEmail() {
+        Employee employee = new Employee(
+                "EMP006",
+                "Avery",
+                "Taylor",
+                "avery@example.com",
+                "Operations",
+                new BigDecimal("78000.00"));
+        employeeRepository.save(employee);
+
+        Optional<Employee> found = employeeRepository.findByEmail("avery@example.com");
+
+        assertTrue(found.isPresent());
+        assertEquals("EMP006", found.get().getEmployeeNumber());
     }
 
     @Test
@@ -149,14 +146,46 @@ class EmployeeRepositoryIntegrationTest {
         employeeRepository.save(emp2);
         employeeRepository.save(emp3);
 
-        /**
-         * MIGRATION-DEMO: Native PostgreSQL query test
-         * This test validates that the native SQL query works correctly
-         */
+        // MIGRATION-DEMO: Validates the native SQL query against the H2 runtime database.
         List<Employee> highEarners = employeeRepository.findHighEarners(new BigDecimal("90000.00"));
 
         assertEquals(1, highEarners.size());
         assertEquals("John", highEarners.get(0).getFirstName());
+    }
+
+    @Test
+    void testUpdateEmployee() {
+        Employee employee = employeeRepository.save(new Employee(
+                "EMP007",
+                "Morgan",
+                "Lee",
+                "morgan@example.com",
+                "Finance",
+                new BigDecimal("81000.00")));
+
+        employee.setDepartment("Technology");
+        employee.setSalary(new BigDecimal("91000.00"));
+        employeeRepository.saveAndFlush(employee);
+
+        Employee updated = employeeRepository.findById(employee.getId()).orElseThrow();
+        assertEquals("Technology", updated.getDepartment());
+        assertEquals(new BigDecimal("91000.00"), updated.getSalary());
+    }
+
+    @Test
+    void testDeleteEmployee() {
+        Employee employee = employeeRepository.save(new Employee(
+                "EMP008",
+                "Jordan",
+                "Casey",
+                "jordan@example.com",
+                "HR",
+                new BigDecimal("70000.00")));
+
+        employeeRepository.deleteById(employee.getId());
+        employeeRepository.flush();
+
+        assertFalse(employeeRepository.findById(employee.getId()).isPresent());
     }
 
 }

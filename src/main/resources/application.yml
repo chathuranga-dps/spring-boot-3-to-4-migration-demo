@@ -8,8 +8,7 @@ spring:
     password: ${DB_PASSWORD:}
 
   jpa:
-    # MIGRATION-DEMO: Hibernate JPA configuration for Spring Boot 3
-    # During Boot 4 migration, Hibernate compatibility and query parsing will be validated
+    # MIGRATION-DEMO: Validated with Hibernate 7 and Spring Data JPA on Spring Boot 4.
     hibernate:
       ddl-auto: update
     open-in-view: false

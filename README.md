@@ -1,315 +1,146 @@
 # Spring Boot 3 to 4 Migration Demo
 
-## Purpose
+This branch contains the Spring Boot 4 version of an employee management REST
+API. The migration modernizes the framework and runtime stack without changing
+the REST API contract or employee business behavior.
 
-This project demonstrates a **Spring Boot 3.5.x baseline** application that is intentionally architected to showcase the migration path from Spring Boot 3 to Spring Boot 4. The application includes realistic components, dependencies, and configurations that will require validation or changes during the migration process.
-
-The goal is **NOT** to show breaking changes, but rather to demonstrate:
-
-- Platform modernization
-- Version compatibility validation
-- Ecosystem changes in the Spring Boot 4 environment
-- How business functionality remains unchanged across the migration
-
-## Current Baseline
-
-```
-Spring Boot Version:          3.5.0
-Spring Framework Version:     6.x
-Java Version:                 17
-Spring Security Version:      6 (Spring Security 6.x)
-Hibernate Version:            6.x
-Jakarta Persistence:          6.0+
-Jackson Version:              2.x (MIGRATION-DEMO)
-Tomcat Version:               10.x
-H2 Database:                  Boot 3 managed version
-PostgreSQL JDBC Driver:       Test scope (Testcontainers)
-Build Tool:                   Maven
-JPA Implementation:           Hibernate with Spring Data JPA
-ORM Approach:                 Jakarta Persistence with JPQL and Native Queries
-```
-
-## Architecture
-
-The project follows a layered architecture:
-
-```
-Controller Layer          → REST endpoints with validation and error handling
-                ↓
-Service Layer             → Business logic with transaction boundaries
-                ↓
-Repository Layer          → Data access with Spring Data JPA
-                ↓
-Persistence Layer         → File-based H2 database with Hibernate
-                ↓
-Configuration             → Security, Jackson, Actuator, DataSource
-```
+The Spring Boot 3 baseline remains available on the `spring-3` branch. The
+migrated application is on the `spring-4` branch.
 
 ## Technology Stack
 
-### Core Framework
+- Java 21
+- Spring Boot 4.1.1
+- Spring Framework 7.0.9
+- Spring Web MVC
+- Spring Data JPA 4.1.1
+- Hibernate ORM 7.4.5.Final
+- Spring Security 7.1.1
+- Jackson 3.1.5
+- Tomcat 11.0.24
+- H2 2.4.240
+- springdoc-openapi 3.1.0
+- Spring Boot Actuator
+- Maven
+- JUnit 5, Mockito, and MockMvc
 
-- **Spring Boot 3.5.x** (parent)
-- **Spring Framework 6.x**
-- **Spring Data JPA** with Hibernate 6.x
-- **Spring Security 6** (for HTTP Basic auth)
-- **Spring Boot Actuator** (for health checks and metrics)
+## Architecture
 
-### Data Access
-
-- **Hibernate 6.x** ORM
-- **Jakarta Persistence** (jakarta.persistence.\*)
-- **H2 2.x** file-based database for local runtime
-- **PostgreSQL 16** via Testcontainers for integration testing
-
-### Serialization
-
-- **Jackson 2.x** (com.fasterxml.jackson.\*)
-- **Custom JacksonConfig** demonstrating Boot 3 / Jackson 2 APIs
-
-### Testing
-
-- **JUnit 5** with Mockito
-- **Spring Boot Test** (MockMvc for controller tests)
-- **Testcontainers** with PostgreSQL container for integration testing
-
-### Deployment
-
-- **Docker** with Java 17 base image (eclipse-temurin:17-jre)
-- **Docker Compose** definition for an optional standalone PostgreSQL service
+```text
+Controller Layer          -> REST endpoints, validation, and error handling
+                |
+Service Layer             -> Business logic and transaction boundaries
+                |
+Repository Layer          -> Spring Data JPA, JPQL, and native SQL
+                |
+Persistence Layer         -> File-based H2 database with Hibernate
+                |
+Configuration             -> Security, Jackson, Actuator, and DataSource
+```
 
 ## Prerequisites
 
-### Local Development
+- JDK 21
+- Maven 3.8.1 or newer
 
-- Java 17+ installed (JDK)
-- Maven 3.8.1+
-- Docker or Docker Desktop (only for PostgreSQL Testcontainers integration tests)
-
-### Verify Java Installation
+Verify the environment:
 
 ```bash
 java -version
-javac -version
-```
-
-### Verify Maven Installation
-
-```bash
 mvn -version
 ```
 
-## Database Configuration
+## Database
 
-The application uses a persistent, embedded H2 database by default. No external
-database service is required.
+The application uses an embedded, persistent H2 database. No external database
+or Docker service is required.
 
-- JDBC URL: `jdbc:h2:file:./data/employee_db`
-- Username: `sa`
-- Password: empty
-- Data files: `./data/`
+| Setting | Value |
+| --- | --- |
+| JDBC URL | `jdbc:h2:file:./data/employee_db` |
+| Username | `sa` |
+| Password | Empty |
+| Data directory | `./data/` |
+| Console URL | `http://localhost:8080/h2-console` |
 
-The database schema is created or updated automatically by Hibernate.
+Hibernate creates or updates the schema at startup. The application inserts
+sample employees only when the table is empty.
 
-### PostgreSQL Integration Tests
+For the H2 Console, use the JDBC URL and credentials shown above.
 
-PostgreSQL remains available for repository integration tests through
-Testcontainers. Docker must be running; Testcontainers starts and removes the
-database container automatically.
+## Build and Run
 
-```bash
-mvn test -Dtest=EmployeeRepositoryIntegrationTest
-```
-
-## Building the Application
-
-### Build with Tests
+Run the complete build:
 
 ```bash
 mvn clean verify
 ```
 
-This command:
-
-- Cleans the previous build
-- Compiles source code
-- Runs unit tests
-- Runs integration tests (with Testcontainers)
-- Verifies the build
-
-### Build Without Tests (Faster)
-
-```bash
-mvn clean package -DskipTests
-```
-
-### View Dependency Tree (Important for Migration)
-
-```bash
-# MIGRATION-DEMO: This shows Spring Boot managed versions
-mvn dependency:tree | head -50
-```
-
-## Running the Application
-
-### Option 1: Maven Spring Boot Plugin
+Start the application:
 
 ```bash
 mvn spring-boot:run
 ```
 
-The application will start on `http://localhost:8080`
-
-### Option 2: Java Command (After Building)
-
-```bash
-java -jar target/spring-boot-migration-demo-1.0.0.jar
-```
-
-### Verify Application is Running
-
-```bash
-curl http://localhost:8080/actuator/health
-```
-
-Expected response:
-
-```json
-{
-  "status": "UP",
-  "components": {
-    "database": {
-      "status": "UP",
-      "details": {
-        "database": "H2",
-        "status": "Connected"
-      }
-    },
-    "diskSpace": { ... },
-    "livenessState": { ... },
-    "readinessState": { ... }
-  }
-}
-```
+The service starts at `http://localhost:8080`.
 
 ## Authentication
 
-The application uses **HTTP Basic Authentication** with in-memory user:
+Employee API endpoints use HTTP Basic authentication:
 
-```
+```text
 Username: demo
 Password: demo123
-Role:    USER
+Role: USER
 ```
 
-### Example Authenticated Request
+The following endpoints are public:
 
-```bash
-curl -u demo:demo123 http://localhost:8080/api/v1/employees
-```
-
-## Swagger / OpenAPI
-
-Spring Boot 3 uses `springdoc-openapi` 2.x.
-
-- Swagger UI: `http://localhost:8080/swagger-ui.html`
-- OpenAPI JSON: `http://localhost:8080/v3/api-docs`
-- Protected Employee API operations can be executed from Swagger UI by selecting
-  **Authorize** and entering the HTTP Basic credentials documented above.
-
-MIGRATION-DEMO:
-Swagger/OpenAPI is included so the migration can demonstrate the springdoc-openapi 2.x to 3.x upgrade required for Spring Boot 4.
-
-## API Endpoints
+- `GET /actuator/health`
+- `GET /actuator/info`
+- `/h2-console/**`
+- `/swagger-ui/**`
+- `/swagger-ui.html`
+- `/v3/api-docs/**`
 
 All `/api/**` endpoints require authentication.
 
-### Create Employee
+## Swagger / OpenAPI
 
-```http
-POST /api/v1/employees
-Content-Type: application/json
-Authorization: Basic demo:demo123
+- Swagger UI: `http://localhost:8080/swagger-ui.html`
+- OpenAPI JSON: `http://localhost:8080/v3/api-docs`
+- Security scheme: HTTP Basic (`basicAuth`)
 
-{
-  "employeeNumber": "EMP001",
-  "firstName": "John",
-  "lastName": "Doe",
-  "email": "john@example.com",
-  "department": "Technology",
-  "salary": 95000.00
-}
+Use the **Authorize** button with `demo` / `demo123` to execute protected
+Employee API operations.
+
+```text
+Spring Boot 3:
+springdoc-openapi 2.8.14
+
+Spring Boot 4:
+springdoc-openapi 3.1.0
 ```
 
-Response: `201 Created`
+This is a good example of a third-party framework dependency that must be
+upgraded together with Spring Boot even though the application's business APIs
+do not change.
 
-### List All Employees
+## API Endpoints
 
-```http
-GET /api/v1/employees
-Authorization: Basic demo:demo123
-```
+| Method | Endpoint | Description |
+| --- | --- | --- |
+| `GET` | `/api/v1/employees` | List employees |
+| `GET` | `/api/v1/employees/{id}` | Get an employee |
+| `POST` | `/api/v1/employees` | Create an employee |
+| `PUT` | `/api/v1/employees/{id}` | Update an employee |
+| `DELETE` | `/api/v1/employees/{id}` | Delete an employee |
+| `GET` | `/api/v1/employees/search?department=Technology` | Search by department |
+| `GET` | `/api/v1/employees/high-earners?salary=90000` | Find active high earners |
 
-Response: `200 OK`
-
-### Get Single Employee
-
-```http
-GET /api/v1/employees/{id}
-Authorization: Basic demo:demo123
-```
-
-Response: `200 OK` or `404 Not Found`
-
-### Update Employee
-
-```http
-PUT /api/v1/employees/{id}
-Content-Type: application/json
-Authorization: Basic demo:demo123
-
-{
-  "firstName": "Jane",
-  "salary": 98000.00,
-  "active": true
-}
-```
-
-Response: `200 OK`
-
-### Delete Employee
-
-```http
-DELETE /api/v1/employees/{id}
-Authorization: Basic demo:demo123
-```
-
-Response: `204 No Content`
-
-### Search by Department (JPQL Query)
-
-```http
-GET /api/v1/employees/search?department=Technology
-Authorization: Basic demo:demo123
-```
-
-Response: `200 OK` - Returns matching employees
-
-### Find High Earners (Native SQL Query)
-
-```http
-GET /api/v1/employees/high-earners?salary=90000
-Authorization: Basic demo:demo123
-```
-
-Response: `200 OK` - Returns employees with salary > 90000
-
-## Example Requests
-
-### Using curl
+Example:
 
 ```bash
-# Create employee
 curl -X POST http://localhost:8080/api/v1/employees \
   -H "Content-Type: application/json" \
   -u demo:demo123 \
@@ -321,42 +152,28 @@ curl -X POST http://localhost:8080/api/v1/employees \
     "department": "Technology",
     "salary": 100000.00
   }'
-
-# Get all employees
-curl -u demo:demo123 http://localhost:8080/api/v1/employees
-
-# Search by department
-curl -u demo:demo123 "http://localhost:8080/api/v1/employees/search?department=Technology"
-
-# High earners
-curl -u demo:demo123 "http://localhost:8080/api/v1/employees/high-earners?salary=85000"
 ```
 
-### Using Postman
+## Actuator
 
-1. Create a new request collection
-2. Set Authorization type to "Basic Auth"
-3. Enter username: `demo` and password: `demo123`
-4. Use the endpoints listed above
+The application exposes:
 
-## Running Tests
+- `/actuator/health`
+- `/actuator/info`
+- `/actuator/metrics`
 
-### Run All Tests
+Verify health:
 
 ```bash
-mvn test
+curl http://localhost:8080/actuator/health
 ```
 
-### Run Specific Test Class
+The overall status and custom database health component should report `UP`, and
+the database product should report `H2`.
 
-```bash
-mvn test -Dtest=EmployeeMapperTest
-mvn test -Dtest=EmployeeServiceTest
-mvn test -Dtest=EmployeeControllerTest
-mvn test -Dtest=EmployeeRepositoryIntegrationTest
-```
+## Tests
 
-### Run Tests with Coverage Report
+Run all tests:
 
 ```bash
 mvn test jacoco:report
@@ -649,191 +466,68 @@ This section describes the intended presentation sequence to demonstrate the mig
     ```bash
     mvn test
     ```
+mvn test
+```
 
-    - All tests pass ✅
+The test suite covers:
 
----
+- Employee mapping
+- Service behavior and duplicate detection
+- Authenticated and unauthenticated MVC requests
+- Public Swagger UI and OpenAPI JSON with documented Employee operations
+- Validation and exception responses
+- Jackson date/time and null-property behavior
+- Public Actuator endpoints
+- H2 repository persistence, lookup, update, delete, JPQL, and native SQL
 
-### Key Message to Management
+## Docker
 
-> **The goal of the migration is NOT to change business functionality.**
->
-> **The goal is to modernize the technology platform while proving that existing business behavior remains unchanged.**
-
-> **Spring Boot 4 migration is an ecosystem upgrade, not merely a version-number change.**
->
-> - Dependencies are managed by the new parent POM
-> - Framework APIs may change (Spring Framework 7.x)
-> - Database libraries are auto-managed (H2 and PostgreSQL drivers)
-> - JSON serialization framework will change (Jackson 3.x)
-> - Security patterns will be validated (Spring Security 7.x)
->
-> **The employee management API works exactly the same before and after the migration.**
-
----
-
-## Building Docker Image
-
-### Build the JAR First
+Build the application and image:
 
 ```bash
 mvn clean package
-```
-
-### Build Docker Image
-
-```bash
 docker build -t spring-boot-migration-demo:1.0.0 .
 ```
 
-The application uses H2 by default when the image is started. Mount a volume at
-the application working directory if the H2 data must persist outside the
+The Docker image uses Eclipse Temurin Java 21. Mount the application working
+directory or its `data` subdirectory when H2 data must persist outside the
 container.
 
----
+## Spring Boot 3 to 4 Migration Changes
 
-## Stopping Services
+The versions below were resolved from Maven on the `spring-3` and `spring-4`
+branches.
 
-### Stop Application
+| Area | Spring Boot 3 Branch | Spring Boot 4 Branch | Change |
+| --- | --- | --- | --- |
+| Java | 17 | 21 | Runtime and compiler baseline upgrade |
+| Spring Boot | 3.5.0 | 4.1.1 | Major framework upgrade |
+| Spring Framework | 6.2.7 | 7.0.9 | Framework generation upgrade |
+| Spring Security | 6.5.0 | 7.1.1 | Security framework upgrade |
+| Hibernate ORM | 6.6.15.Final | 7.4.5.Final | ORM upgrade |
+| Jackson Databind | 2.19.0 | 3.1.5 | Jackson 2 to Jackson 3 migration |
+| Tomcat | 10.1.41 | 11.0.24 | Servlet container upgrade |
+| H2 | 2.3.232 | 2.4.240 | Managed database dependency upgrade |
+| springdoc-openapi | 2.8.14 | 3.1.0 | Spring Boot 4 compatibility upgrade |
+| Spring Data JPA | 3.5.0 | 4.1.1 | Data access framework upgrade |
+| Web starter | `spring-boot-starter-web` | `spring-boot-starter-webmvc` | Boot 4 modular starter |
+| Test starters | `spring-boot-starter-test` | MVC and JPA test starters | Boot 4 modular test structure |
 
-```bash
-Ctrl+C
-```
+Key technical changes:
 
----
+- Migrated the build and Docker runtime to Java 21.
+- Replaced the general web starter with the Boot 4 MVC starter.
+- Migrated Jackson configuration and tests to Jackson 3 `tools.jackson` APIs.
+- Updated Actuator health imports for the Boot 4 health contributor module.
+- Updated test annotation packages and replaced `@MockBean` with
+  `@MockitoBean`.
+- Added the Boot 4 H2 Console module and Spring Security frame support.
+- Upgraded springdoc-openapi from 2.8.14 to 3.1.0 while preserving the
+  documented API contract and HTTP Basic security scheme.
+- Removed all legacy external-database dependencies and configuration.
+- Migrated repository integration tests to H2.
+- Preserved endpoint paths, authentication credentials, payloads, and response
+  behavior.
 
-## Troubleshooting
-
-### H2 Database Lock
-
-- Stop any other application process using `./data/employee_db`
-- Start the application again
-
-### Unauthorized Errors (401)
-
-- Use correct credentials: `-u demo:demo123`
-- Or use: `Authorization: Basic ZGVtbzpkZW1vMTIz` header
-
-### Test Failures
-
-- Ensure Docker is running for PostgreSQL Testcontainers integration tests
-- Check logs: `mvn test -X` for debug output
-
-### Maven Build Failures
-
-- Clear Maven cache: `rm -rf ~/.m2/repository`
-- Try again: `mvn clean install`
-
----
-
-## Project Structure
-
-```
-spring-boot-3-to-4-migration-demo/
-├── pom.xml                                    # Maven configuration (MIGRATION-DEMO markers)
-├── Dockerfile                                 # Docker image definition (Java 17)
-├── docker-compose.yml                         # Optional standalone PostgreSQL service
-├── README.md                                  # This file
-├── .gitignore                                 # Git ignore patterns
-│
-├── src/main/java/com/example/migrationdemo/
-│   ├── MigrationDemoApplication.java           # Spring Boot entry point
-│   │
-│   ├── entity/
-│   │   └── Employee.java                       # JPA entity with @PrePersist/@PreUpdate
-│   │
-│   ├── dto/
-│   │   ├── EmployeeCreateRequest.java          # Request DTO with validation
-│   │   ├── EmployeeUpdateRequest.java          # Update DTO with optional fields
-│   │   └── EmployeeResponse.java               # Response DTO
-│   │
-│   ├── mapper/
-│   │   └── EmployeeMapper.java                 # DTO ↔ Entity mapping
-│   │
-│   ├── repository/
-│   │   └── EmployeeRepository.java             # Spring Data JPA (JPQL + Native queries)
-│   │
-│   ├── service/
-│   │   └── EmployeeService.java                # Business logic with @Transactional
-│   │
-│   ├── controller/
-│   │   └── EmployeeController.java             # REST endpoints
-│   │
-│   ├── exception/
-│   │   ├── EmployeeNotFoundException.java      # Custom exception
-│   │   ├── DuplicateEmployeeException.java     # Custom exception
-│   │   ├── ErrorResponse.java                  # Error DTO (MIGRATION-DEMO Jackson config)
-│   │   └── GlobalExceptionHandler.java         # Central exception handling
-│   │
-│   ├── config/
-│   │   ├── JacksonConfig.java                  # Jackson 2 configuration (MIGRATION-DEMO)
-│   │   ├── OpenApiConfig.java                  # Swagger/OpenAPI and HTTP Basic scheme
-│   │   └── SecurityConfig.java                 # Spring Security 6 config (MIGRATION-DEMO)
-│   │
-│   ├── health/
-│   │   └── DatabaseHealthIndicator.java        # Custom Actuator health check
-│   │
-│   └── init/
-│       └── DataInitializer.java                # Sample data initialization
-│
-├── src/main/resources/
-│   └── application.yml                         # Application configuration
-│
-├── src/test/java/com/example/migrationdemo/
-│   ├── mapper/
-│   │   └── EmployeeMapperTest.java             # Unit test
-│   │
-│   ├── service/
-│   │   └── EmployeeServiceTest.java            # Unit test with Mockito
-│   │
-│   ├── controller/
-│   │   └── EmployeeControllerTest.java         # Controller test with MockMvc
-│   │
-│   ├── integration/
-│   │   └── EmployeeRepositoryIntegrationTest.java  # Integration test (Testcontainers)
-│   │
-│   └── AbstractIntegrationTest.java            # Base test class
-│
-└── src/test/resources/
-    └── application-test.yml                    # Test configuration
-```
-
----
-
-## Next Steps (For Management)
-
-1. ✅ **Review this Spring Boot 3 baseline** - Understand current architecture
-2. 📋 **Create Git branches:**
-   - `01-spring-boot-3-baseline` (current)
-   - `02-spring-boot-4-migration` (WIP)
-   - `03-spring-boot-4-completed` (target)
-3. 🔄 **Plan migration phases:**
-   - Phase 1: Update dependencies (Spring Boot 3.5.x → 4.x, Java 17 → 21)
-   - Phase 2: Fix compilation errors (Jackson, Security, Hibernate)
-   - Phase 3: Run tests and validate
-   - Phase 4: Deployment and monitoring
-4. 📊 **Measure:**
-   - Build time
-   - Test execution time
-   - Runtime performance (memory, CPU)
-   - API response times
-
----
-
-## Additional Resources
-
-- [Spring Boot 3.5.x Documentation](https://spring.io/projects/spring-boot)
-- [Spring Framework 6.x Documentation](https://spring.io/projects/spring-framework)
-- [Hibernate ORM Documentation](https://hibernate.org/)
-- [Spring Security Documentation](https://spring.io/projects/spring-security)
-- [Jackson Documentation](https://github.com/FasterXML/jackson)
-- [H2 Database Documentation](https://www.h2database.com/)
-- [PostgreSQL JDBC Driver](https://jdbc.postgresql.org/)
-- [Testcontainers Documentation](https://www.testcontainers.org/)
-
----
-
-**Project Created:** September 2026  
-**Spring Boot Version:** 3.5.0  
-**Java Version:** 17  
-**Status:** ✅ Fully functional baseline ready for migration to Spring Boot 4
+See [SPRING_BOOT_4_MIGRATION_REPORT.md](SPRING_BOOT_4_MIGRATION_REPORT.md) for
+the detailed migration record and validation results.
