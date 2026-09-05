@@ -176,6 +176,296 @@ the database product should report `H2`.
 Run all tests:
 
 ```bash
+mvn test jacoco:report
+```
+
+### Test Results
+
+```
+Unit Tests:
+  - EmployeeMapperTest
+  - EmployeeServiceTest
+
+Controller Tests:
+  - EmployeeControllerTest (MockMvc, authentication scenarios)
+
+Integration Tests:
+  - EmployeeRepositoryIntegrationTest (Testcontainers with PostgreSQL)
+```
+
+## Migration Areas to Demonstrate
+
+### 1. **Spring Boot Version Upgrade** (3.5.x → 4.x)
+
+- **Current:** Spring Boot 3.5.x in `pom.xml` parent
+- **Future:** Spring Boot 4.x
+- **Validation:** Parent version change, then verify dependency compatibility
+
+### 2. **Java Version Upgrade** (17 → 21)
+
+- **Current:** Java 17 in `pom.xml` properties and `Dockerfile`
+- **Future:** Java 21
+- **Validation:** Update `<java.version>21</java.version>` and Docker image, recompile
+
+### 3. **Spring Framework Version** (6.x → 7.x)
+
+- **Current:** Spring Framework 6.x (managed by Boot 3 parent)
+- **Future:** Spring Framework 7.x (managed by Boot 4 parent)
+- **Validation:** Removed/deprecated API checks, see `config/SecurityConfig.java`
+
+### 4. **Spring Security Version** (6.x → 7.x)
+
+- **Location:** `config/SecurityConfig.java`
+- **Current:** Spring Security 6.x API (SecurityFilterChain, authorizeHttpRequests)
+- **Future:** Spring Security 7.x
+- **Migration Note:** API is stable; validation ensures no deprecated methods
+
+### 5. **Hibernate ORM Version** (6.x → 7.x)
+
+- **Current:** Hibernate 6.x (managed by Spring Boot 3)
+- **Validation Areas:** `repository/EmployeeRepository.java`
+  - JPQL query: `findActiveEmployeesByDepartment()` with string interpolation
+  - Native SQL query: `findHighEarners()` database compatibility
+- **Future:** Hibernate 7.x compatibility
+
+### 6. **Jakarta Persistence** (6.0+ → Latest)
+
+- **Current:** `jakarta.persistence.*` in `entity/Employee.java`
+- **Package:** Already using Jakarta (not legacy javax.persistence)
+- **Validation:** Entity annotations, @GeneratedValue, @PrePersist, @PreUpdate
+
+### 7. **Jackson Serialization** (2.x → 3.x) 🔴 MAJOR CHANGE
+
+- **Location:** `config/JacksonConfig.java`
+- **Current:** `com.fasterxml.jackson.databind.ObjectMapper` (Jackson 2)
+- **Future:** Jackson 3.x with breaking API changes
+- **Changes:**
+  - Package names will change (still com.fasterxml but different organization)
+  - Some deprecated APIs will be removed
+  - Configuration methods may be renamed
+- **Validation:** Update Jackson version, verify ObjectMapper creation and configuration
+
+### Jackson Source-Code Migration Scenario
+
+Spring Boot 3 currently contains custom Jackson 2 integration code using:
+
+- `com.fasterxml.jackson.*`
+- `@JsonComponent`
+- `Jackson2ObjectMapperBuilderCustomizer`
+
+These APIs are intentionally included so the Spring Boot 4 migration can demonstrate real Java source-code changes required for Jackson 3 compatibility.
+
+### 8. **Database Drivers**
+
+- **Default runtime:** H2 with a file-based database
+- **Integration tests:** PostgreSQL JDBC driver and PostgreSQL Testcontainers module
+- **Current:** Driver versions managed by the Spring Boot 3 parent
+- **Future:** Driver versions managed by the Spring Boot 4 parent
+- **Application Configuration:** `application.yml` datasource settings
+- **Validation:** Verify H2 runtime behavior and PostgreSQL integration tests
+
+### 9. **Web Framework** (Spring Web Starter)
+
+- **Location:** `pom.xml` and `controller/EmployeeController.java`
+- **Current:** Spring Boot 3 web starter + Tomcat 10.x
+- **Future:** Spring Boot 4 may have different Servlet/Tomcat structure
+- **Validation:** REST endpoints continue to work as expected
+
+### 10. **Tomcat Servlet Container** (10.x → 11.x)
+
+- **Current:** Tomcat 10.x (managed by Spring Boot 3)
+- **Future:** Tomcat 11.x (managed by Spring Boot 4)
+- **Impact:** Usually transparent; tested through integration tests
+
+### 11. **Actuator Health Endpoints**
+
+- **Location:** `health/DatabaseHealthIndicator.java`
+- **Current:** Custom health indicator with Boot 3 Actuator
+- **Validation:** Ensure `/actuator/health` continues to work
+
+### 12. **Testing Framework** (JUnit 5 + Testcontainers)
+
+- **Current:** JUnit 5 + Mockito + Testcontainers
+- **Future:** Spring Boot 4 test stack
+- **Validation:** Unit, controller, and integration tests must pass
+
+---
+
+## Spring Boot 3 → 4 Migration Roadmap
+
+| Area                 | Current Demo            | Future Target    | Migration Consideration                       |
+| -------------------- | ----------------------- | ---------------- | --------------------------------------------- |
+| **Spring Boot**      | 3.5.x                   | 4.x              | Major platform upgrade                        |
+| **Java**             | 17                      | 21               | JDK, CI/CD pipelines, Docker images           |
+| **Spring Framework** | 6.x                     | 7.x              | Removed/deprecated APIs                       |
+| **Spring Security**  | 6.x                     | 7.x              | Security authentication/authorization         |
+| **Hibernate ORM**    | 6.x                     | 7.x              | JPQL queries, native queries, entity mappings |
+| **Jackson**          | 2.x                     | 3.x              | JSON serialization, ObjectMapper API changes  |
+| **Tomcat**           | 10.x                    | 11.x             | Servlet compatibility                         |
+| **Database Drivers** | H2 + PostgreSQL tests   | Boot 4 managed   | Runtime and integration-test compatibility    |
+| **Web Starter**      | spring-boot-starter-web | Boot 4 variant   | Controller, REST endpoint structure           |
+| **Tests**            | Boot 3 + JUnit 5        | Boot 4 + JUnit 5 | Test compatibility                            |
+
+---
+
+## Management Demo Flow
+
+This section describes the intended presentation sequence to demonstrate the migration.
+
+### Phase 1: Demonstrate Current Baseline (Boot 3 Working)
+
+1. **Build the Application**
+
+   ```bash
+   mvn clean package -DskipTests
+   ```
+
+   H2 is embedded, so no database service needs to be started.
+
+2. **Start the Application**
+
+   ```bash
+   mvn spring-boot:run
+   ```
+
+3. **Create an Employee**
+
+   ```bash
+   curl -X POST http://localhost:8080/api/v1/employees \
+     -H "Content-Type: application/json" \
+     -u demo:demo123 \
+     -d '{
+       "employeeNumber": "EMP001",
+       "firstName": "John",
+       "lastName": "Smith",
+       "email": "john.smith@example.com",
+       "department": "Technology",
+       "salary": 95000.00
+     }'
+   ```
+
+4. **Retrieve the Employee**
+
+   ```bash
+   curl -u demo:demo123 http://localhost:8080/api/v1/employees/1
+   ```
+
+5. **Show Current Versions**
+
+   ```bash
+   java -version
+   # Output: openjdk version "17.x.x" ...
+
+   mvn -v
+   # Output: Apache Maven 3.8.x ...
+   ```
+
+6. **Show Spring Boot and Dependency Versions**
+
+   ```bash
+   mvn dependency:tree | grep "spring-boot-starter-\|h2\|postgresql\|jackson\|hibernate"
+   ```
+
+   - Spring Boot: 3.5.0
+   - H2: Boot 3 managed version
+   - PostgreSQL JDBC: test scope
+   - Jackson: 2.x
+   - Hibernate: 6.x
+
+7. **Check Actuator Health**
+   ```bash
+   curl http://localhost:8080/actuator/health | jq .
+   ```
+
+   - Status: UP
+   - Database: UP
+   - All components healthy ✅
+
+---
+
+### Phase 2: Migration Preparation (Change Dependencies)
+
+9. **Stop Application**
+
+   ```bash
+   Ctrl+C
+   ```
+
+10. **Update Spring Boot Version (3.5.x → 4.x)**
+    - Modify `pom.xml`: Change `spring-boot-starter-parent` version from `3.5.0` to `4.0.0` (or latest 4.x)
+
+11. **Update Java Version (17 → 21)**
+    - Modify `pom.xml`: Change `<java.version>17</java.version>` to `<java.version>21</java.version>`
+    - Modify `Dockerfile`: Change `FROM eclipse-temurin:17-jre` to `FROM eclipse-temurin:21-jre`
+
+12. **Attempt to Build**
+    ```bash
+    mvn clean compile
+    ```
+
+    - Expected: Compilation errors or warnings related to:
+      - Jackson API changes (if Jackson 3.x is included)
+      - Spring Security API changes (if minor breaking changes)
+      - Hibernate changes (if new version has incompatibilities)
+
+---
+
+### Phase 3: Address Migration Issues
+
+13. **Fix Compilation Errors**
+    - Update `config/JacksonConfig.java` to use Jackson 3.x APIs
+    - Update `config/SecurityConfig.java` if Spring Security 7 has API changes
+    - Update `repository/EmployeeRepository.java` if Hibernate has query syntax issues
+
+14. **Update Tests**
+    - Verify `EmployeeRepositoryIntegrationTest` still works with Testcontainers
+    - Update any test utilities if Spring Boot test utilities changed
+
+15. **Build Again**
+    ```bash
+    mvn clean verify
+    ```
+
+    - All tests must pass
+    - Zero compilation errors
+
+---
+
+### Phase 4: Validate Migrated Application
+
+16. **Rebuild Application**
+
+    ```bash
+    mvn clean package
+    ```
+
+17. **Start Migrated Application**
+
+    ```bash
+    mvn spring-boot:run
+    ```
+
+18. **Verify Same API Endpoint Works**
+
+    ```bash
+    curl -u demo:demo123 http://localhost:8080/api/v1/employees/1
+    ```
+
+    - Returns: Same employee data as before ✅
+    - Business logic unchanged ✅
+
+19. **Verify Actuator Health**
+
+    ```bash
+    curl http://localhost:8080/actuator/health | jq .
+    ```
+
+    - Status: UP ✅
+
+20. **Run All Tests One More Time**
+    ```bash
+    mvn test
+    ```
 mvn test
 ```
 

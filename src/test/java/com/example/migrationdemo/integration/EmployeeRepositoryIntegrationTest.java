@@ -19,6 +19,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * Repository integration tests use H2 to match the application runtime database
  * and validate Hibernate / Spring Data compatibility in Spring Boot 4.
  */
+@Testcontainers(disabledWithoutDocker = true)
 @DataJpaTest
 @ActiveProfiles("test")
 class EmployeeRepositoryIntegrationTest {

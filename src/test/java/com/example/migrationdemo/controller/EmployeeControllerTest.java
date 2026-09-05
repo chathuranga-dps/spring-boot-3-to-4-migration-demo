@@ -16,6 +16,7 @@ import tools.jackson.databind.json.JsonMapper;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
@@ -41,6 +42,21 @@ class EmployeeControllerTest {
     void testGetAllEmployees_Success() throws Exception {
         mockMvc.perform(get("/api/v1/employees")
                 .with(httpBasic("demo", "demo123")))
+        EmployeeResponse response = new EmployeeResponse(
+                1L,
+                "EMP001",
+                "John",
+                "Smith",
+                "john.smith@example.com",
+                "Technology",
+                new BigDecimal("95000.00"),
+                true,
+                LocalDateTime.now(),
+                LocalDateTime.now());
+
+        when(employeeService.getAllEmployees()).thenReturn(List.of(response));
+
+        mockMvc.perform(get("/api/v1/employees"))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON));
     }
@@ -109,6 +125,8 @@ class EmployeeControllerTest {
         mockMvc.perform(get("/api/v1/employees/1")
                 .with(httpBasic("demo", "demo123")))
                 .andExpect(status().isOk())
+                .andExpect(jsonPath("$.employeeNumber").value("EMP001"))
+                .andExpect(jsonPath("$.fullName").value("John Doe"));
                 .andExpect(jsonPath("$.employeeNumber").value("EMP001"))
                 .andExpect(jsonPath("$.createdAt").isString());
     }
