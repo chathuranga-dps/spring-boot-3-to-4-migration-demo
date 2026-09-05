@@ -205,7 +205,7 @@ Key technical changes:
 - Updated test annotation packages and replaced `@MockBean` with
   `@MockitoBean`.
 - Added the Boot 4 H2 Console module and Spring Security frame support.
-- Removed PostgreSQL, Testcontainers, and Docker Compose remnants.
+- Removed all legacy external-database dependencies and configuration.
 - Migrated repository integration tests to H2.
 - Preserved endpoint paths, authentication credentials, payloads, and response
   behavior.
