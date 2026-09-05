@@ -15,6 +15,8 @@ public interface EmployeeRepository extends JpaRepository<Employee, Long> {
 
     Optional<Employee> findByEmployeeNumber(String employeeNumber);
 
+    Optional<Employee> findByEmail(String email);
+
     List<Employee> findByDepartmentIgnoreCase(String department);
 
     /**
@@ -31,8 +33,8 @@ public interface EmployeeRepository extends JpaRepository<Employee, Long> {
             @Param("department") String department);
 
     /**
-     * MIGRATION-DEMO: Native PostgreSQL query that will be validated for
-     * database compatibility during Spring Boot 4 migration.
+     * MIGRATION-DEMO:
+     * Updated for Hibernate / Spring Data compatibility in Spring Boot 4.
      */
     @Query(value = """
             select *

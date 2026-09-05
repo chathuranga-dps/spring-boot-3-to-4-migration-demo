@@ -84,4 +84,22 @@ class EmployeeServiceTest {
         });
     }
 
+    @Test
+    void testCreateEmployee_DuplicateEmail() {
+        EmployeeCreateRequest request = new EmployeeCreateRequest(
+                "EMP009",
+                "Taylor",
+                "Morgan",
+                "existing@example.com",
+                "Technology",
+                new BigDecimal("85000.00"));
+
+        when(employeeRepository.findByEmployeeNumber("EMP009")).thenReturn(Optional.empty());
+        when(employeeRepository.findByEmail("existing@example.com"))
+                .thenReturn(Optional.of(new Employee()));
+
+        assertThrows(DuplicateEmployeeException.class, () ->
+                employeeService.createEmployee(request));
+    }
+
 }

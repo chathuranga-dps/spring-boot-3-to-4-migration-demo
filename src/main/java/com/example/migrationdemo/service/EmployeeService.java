@@ -34,7 +34,7 @@ public class EmployeeService {
         }
 
         // Check for duplicate email
-        if (employeeRepository.findByEmployeeNumber(request.getEmail()).isPresent()) {
+        if (employeeRepository.findByEmail(request.getEmail()).isPresent()) {
             throw new DuplicateEmployeeException("email", request.getEmail());
         }
 
@@ -65,7 +65,7 @@ public class EmployeeService {
 
         // Check for duplicate email if email is being updated
         if (request.getEmail() != null && !request.getEmail().equals(employee.getEmail())) {
-            if (employeeRepository.findByEmployeeNumber(request.getEmail()).isPresent()) {
+            if (employeeRepository.findByEmail(request.getEmail()).isPresent()) {
                 throw new DuplicateEmployeeException("email", request.getEmail());
             }
         }

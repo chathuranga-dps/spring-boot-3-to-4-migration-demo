@@ -1,7 +1,5 @@
-# MIGRATION-DEMO: Java 17 base image
-# During Spring Boot 4 migration, this will be updated to Java 21
-# This demonstrates the JDK version upgrade path
-FROM eclipse-temurin:17-jre
+# MIGRATION-DEMO: Runtime upgraded from Java 17 to Java 21 for Spring Boot 4.
+FROM eclipse-temurin:21-jre
 
 # Set working directory
 WORKDIR /app

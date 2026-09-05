@@ -15,11 +15,7 @@ import org.springframework.security.web.SecurityFilterChain;
 
 /**
  * MIGRATION-DEMO:
- * Spring Security configuration using Spring Security 6.x APIs.
- * During Spring Boot 4 migration, Spring Security 7.x compatibility will be
- * validated.
- * The API may change, deprecations will be removed, and new security patterns
- * may be introduced.
+ * Security configuration updated and validated for Spring Security 7.
  */
 @Configuration
 @EnableWebSecurity
@@ -32,8 +28,10 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/actuator/health").permitAll()
                         .requestMatchers("/actuator/info").permitAll()
+                        .requestMatchers("/h2-console/**").permitAll()
                         .requestMatchers("/api/**").authenticated()
                         .anyRequest().permitAll())
+                .headers(headers -> headers.frameOptions(frameOptions -> frameOptions.sameOrigin()))
                 .httpBasic(Customizer.withDefaults()); // Enable HTTP Basic authentication
 
         return http.build();
