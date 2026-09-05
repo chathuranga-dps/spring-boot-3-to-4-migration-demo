@@ -41,3 +41,4 @@ logs/
 # Database
 *.sql
 *.sqlite
+/data/

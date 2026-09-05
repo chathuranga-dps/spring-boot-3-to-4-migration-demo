@@ -3,12 +3,9 @@ spring:
     name: spring-boot-migration-demo
 
   datasource:
-    # MIGRATION-DEMO: PostgreSQL datasource configuration for Spring Boot 3
-    # The JDBC driver version is managed by Spring Boot parent pom.xml
-    # During Boot 4 migration, driver compatibility and managed versions will be validated
-    url: ${DB_URL:jdbc:postgresql://localhost:5432/employee_db}
-    username: ${DB_USERNAME:postgres}
-    password: ${DB_PASSWORD:postgres}
+    url: ${DB_URL:jdbc:h2:file:./data/employee_db}
+    username: ${DB_USERNAME:sa}
+    password: ${DB_PASSWORD:}
 
   jpa:
     # MIGRATION-DEMO: Hibernate JPA configuration for Spring Boot 3
@@ -19,7 +16,11 @@ spring:
     properties:
       hibernate:
         format_sql: true
-        dialect: org.hibernate.dialect.PostgreSQLDialect
+
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
 
   jackson:
     # Jackson serialization/deserialization settings
