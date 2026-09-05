@@ -22,7 +22,8 @@ Hibernate Version:            6.x
 Jakarta Persistence:          6.0+
 Jackson Version:              2.x (MIGRATION-DEMO)
 Tomcat Version:               10.x
-PostgreSQL JDBC Driver:       Boot 3 managed version
+H2 Database:                  Boot 3 managed version
+PostgreSQL JDBC Driver:       Test scope (Testcontainers)
 Build Tool:                   Maven
 JPA Implementation:           Hibernate with Spring Data JPA
 ORM Approach:                 Jakarta Persistence with JPQL and Native Queries
@@ -39,7 +40,7 @@ Service Layer             → Business logic with transaction boundaries
                 ↓
 Repository Layer          → Data access with Spring Data JPA
                 ↓
-Persistence Layer         → PostgreSQL database with Hibernate
+Persistence Layer         → File-based H2 database with Hibernate
                 ↓
 Configuration             → Security, Jackson, Actuator, DataSource
 ```
@@ -58,7 +59,8 @@ Configuration             → Security, Jackson, Actuator, DataSource
 
 - **Hibernate 6.x** ORM
 - **Jakarta Persistence** (jakarta.persistence.\*)
-- **PostgreSQL 16** (via Docker Compose)
+- **H2 2.x** file-based database for local runtime
+- **PostgreSQL 16** via Testcontainers for integration testing
 
 ### Serialization
 
@@ -74,7 +76,7 @@ Configuration             → Security, Jackson, Actuator, DataSource
 ### Deployment
 
 - **Docker** with Java 17 base image (eclipse-temurin:17-jre)
-- **Docker Compose** for PostgreSQL + application orchestration
+- **Docker Compose** definition for an optional standalone PostgreSQL service
 
 ## Prerequisites
 
@@ -82,8 +84,7 @@ Configuration             → Security, Jackson, Actuator, DataSource
 
 - Java 17+ installed (JDK)
 - Maven 3.8.1+
-- Docker and Docker Compose
-- PostgreSQL 16 (or use Docker Compose)
+- Docker or Docker Desktop (only for PostgreSQL Testcontainers integration tests)
 
 ### Verify Java Installation
 
@@ -98,26 +99,26 @@ javac -version
 mvn -version
 ```
 
-## Starting PostgreSQL
+## Database Configuration
 
-### Option 1: Docker Compose (Recommended)
+The application uses a persistent, embedded H2 database by default. No external
+database service is required.
+
+- JDBC URL: `jdbc:h2:file:./data/employee_db`
+- Username: `sa`
+- Password: empty
+- Data files: `./data/`
+
+The database schema is created or updated automatically by Hibernate.
+
+### PostgreSQL Integration Tests
+
+PostgreSQL remains available for repository integration tests through
+Testcontainers. Docker must be running; Testcontainers starts and removes the
+database container automatically.
 
 ```bash
-docker-compose up -d
-```
-
-This starts PostgreSQL 16 on port 5432:
-
-- Database: `employee_db`
-- Username: `postgres`
-- Password: `postgres`
-
-### Option 2: Local PostgreSQL
-
-If you have PostgreSQL installed locally, create the database:
-
-```sql
-CREATE DATABASE employee_db;
+mvn test -Dtest=EmployeeRepositoryIntegrationTest
 ```
 
 ## Building the Application
@@ -180,7 +181,7 @@ Expected response:
     "database": {
       "status": "UP",
       "details": {
-        "database": "PostgreSQL",
+        "database": "H2",
         "status": "Connected"
       }
     },
@@ -395,7 +396,7 @@ Integration Tests:
 - **Current:** Hibernate 6.x (managed by Spring Boot 3)
 - **Validation Areas:** `repository/EmployeeRepository.java`
   - JPQL query: `findActiveEmployeesByDepartment()` with string interpolation
-  - Native SQL query: `findHighEarners()` PostgreSQL-specific syntax
+  - Native SQL query: `findHighEarners()` database compatibility
 - **Future:** Hibernate 7.x compatibility
 
 ### 6. **Jakarta Persistence** (6.0+ → Latest)
@@ -415,13 +416,14 @@ Integration Tests:
   - Configuration methods may be renamed
 - **Validation:** Update Jackson version, verify ObjectMapper creation and configuration
 
-### 8. **PostgreSQL JDBC Driver**
+### 8. **Database Drivers**
 
-- **Current:** Version managed by Spring Boot 3 parent
-- **Future:** Version managed by Spring Boot 4 parent
-- **Dependency:** `org.postgresql:postgresql`
+- **Default runtime:** H2 with a file-based database
+- **Integration tests:** PostgreSQL JDBC driver and PostgreSQL Testcontainers module
+- **Current:** Driver versions managed by the Spring Boot 3 parent
+- **Future:** Driver versions managed by the Spring Boot 4 parent
 - **Application Configuration:** `application.yml` datasource settings
-- **Note:** PostgreSQL Server (16) does NOT need to be upgraded just because Spring Boot is upgraded
+- **Validation:** Verify H2 runtime behavior and PostgreSQL integration tests
 
 ### 9. **Web Framework** (Spring Web Starter)
 
@@ -461,7 +463,7 @@ Integration Tests:
 | **Hibernate ORM**    | 6.x                     | 7.x              | JPQL queries, native queries, entity mappings |
 | **Jackson**          | 2.x                     | 3.x              | JSON serialization, ObjectMapper API changes  |
 | **Tomcat**           | 10.x                    | 11.x             | Servlet compatibility                         |
-| **PostgreSQL JDBC**  | Boot 3 managed          | Boot 4 managed   | Driver version compatibility                  |
+| **Database Drivers** | H2 + PostgreSQL tests   | Boot 4 managed   | Runtime and integration-test compatibility    |
 | **Web Starter**      | spring-boot-starter-web | Boot 4 variant   | Controller, REST endpoint structure           |
 | **Tests**            | Boot 3 + JUnit 5        | Boot 4 + JUnit 5 | Test compatibility                            |
 
@@ -473,29 +475,21 @@ This section describes the intended presentation sequence to demonstrate the mig
 
 ### Phase 1: Demonstrate Current Baseline (Boot 3 Working)
 
-1. **Start PostgreSQL**
+1. **Build the Application**
 
    ```bash
-   docker-compose up -d
+   mvn clean package -DskipTests
    ```
 
-2. **Build the Application**
+   H2 is embedded, so no database service needs to be started.
 
-   ```bash
-   mvn clean verify
-   ```
-
-   - All unit tests pass ✅
-   - All controller tests pass ✅
-   - All integration tests pass ✅
-
-3. **Start the Application**
+2. **Start the Application**
 
    ```bash
    mvn spring-boot:run
    ```
 
-4. **Create an Employee**
+3. **Create an Employee**
 
    ```bash
    curl -X POST http://localhost:8080/api/v1/employees \
@@ -511,13 +505,13 @@ This section describes the intended presentation sequence to demonstrate the mig
      }'
    ```
 
-5. **Retrieve the Employee**
+4. **Retrieve the Employee**
 
    ```bash
    curl -u demo:demo123 http://localhost:8080/api/v1/employees/1
    ```
 
-6. **Show Current Versions**
+5. **Show Current Versions**
 
    ```bash
    java -version
@@ -527,18 +521,19 @@ This section describes the intended presentation sequence to demonstrate the mig
    # Output: Apache Maven 3.8.x ...
    ```
 
-7. **Show Spring Boot and Dependency Versions**
+6. **Show Spring Boot and Dependency Versions**
 
    ```bash
-   mvn dependency:tree | grep "spring-boot-starter-\|postgresql\|jackson\|hibernate"
+   mvn dependency:tree | grep "spring-boot-starter-\|h2\|postgresql\|jackson\|hibernate"
    ```
 
    - Spring Boot: 3.5.0
-   - PostgreSQL JDBC: Boot 3 managed version
+   - H2: Boot 3 managed version
+   - PostgreSQL JDBC: test scope
    - Jackson: 2.x
    - Hibernate: 6.x
 
-8. **Check Actuator Health**
+7. **Check Actuator Health**
    ```bash
    curl http://localhost:8080/actuator/health | jq .
    ```
@@ -647,7 +642,7 @@ This section describes the intended presentation sequence to demonstrate the mig
 >
 > - Dependencies are managed by the new parent POM
 > - Framework APIs may change (Spring Framework 7.x)
-> - Database libraries are auto-managed (PostgreSQL driver)
+> - Database libraries are auto-managed (H2 and PostgreSQL drivers)
 > - JSON serialization framework will change (Jackson 3.x)
 > - Security patterns will be validated (Spring Security 7.x)
 >
@@ -669,23 +664,13 @@ mvn clean package
 docker build -t spring-boot-migration-demo:1.0.0 .
 ```
 
-### Run Application with Docker Compose
-
-Uncomment the `application` service in `docker-compose.yml`, then:
-
-```bash
-docker-compose up
-```
+The application uses H2 by default when the image is started. Mount a volume at
+the application working directory if the H2 data must persist outside the
+container.
 
 ---
 
 ## Stopping Services
-
-### Stop PostgreSQL (Docker Compose)
-
-```bash
-docker-compose down
-```
 
 ### Stop Application
 
@@ -697,10 +682,10 @@ Ctrl+C
 
 ## Troubleshooting
 
-### Connection Refused on Port 5432
+### H2 Database Lock
 
-- Ensure PostgreSQL is running: `docker-compose up -d`
-- Check status: `docker-compose ps`
+- Stop any other application process using `./data/employee_db`
+- Start the application again
 
 ### Unauthorized Errors (401)
 
@@ -709,7 +694,7 @@ Ctrl+C
 
 ### Test Failures
 
-- Ensure PostgreSQL is running for integration tests
+- Ensure Docker is running for PostgreSQL Testcontainers integration tests
 - Check logs: `mvn test -X` for debug output
 
 ### Maven Build Failures
@@ -725,7 +710,7 @@ Ctrl+C
 spring-boot-3-to-4-migration-demo/
 ├── pom.xml                                    # Maven configuration (MIGRATION-DEMO markers)
 ├── Dockerfile                                 # Docker image definition (Java 17)
-├── docker-compose.yml                         # PostgreSQL service definition
+├── docker-compose.yml                         # Optional standalone PostgreSQL service
 ├── README.md                                  # This file
 ├── .gitignore                                 # Git ignore patterns
 │
@@ -819,6 +804,7 @@ spring-boot-3-to-4-migration-demo/
 - [Hibernate ORM Documentation](https://hibernate.org/)
 - [Spring Security Documentation](https://spring.io/projects/spring-security)
 - [Jackson Documentation](https://github.com/FasterXML/jackson)
+- [H2 Database Documentation](https://www.h2database.com/)
 - [PostgreSQL JDBC Driver](https://jdbc.postgresql.org/)
 - [Testcontainers Documentation](https://www.testcontainers.org/)
 
