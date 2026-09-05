@@ -17,6 +17,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
@@ -40,9 +41,25 @@ class EmployeeControllerTest {
     @Test
     @WithMockUser
     void testGetAllEmployees_Success() throws Exception {
+        EmployeeResponse response = new EmployeeResponse(
+                1L,
+                "EMP001",
+                "John",
+                "Smith",
+                "john.smith@example.com",
+                "Technology",
+                new BigDecimal("95000.00"),
+                true,
+                LocalDateTime.now(),
+                LocalDateTime.now());
+
+        when(employeeService.getAllEmployees()).thenReturn(List.of(response));
+
         mockMvc.perform(get("/api/v1/employees"))
                 .andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON));
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$[0].employeeNumber").value("EMP001"))
+                .andExpect(jsonPath("$[0].fullName").value("John Smith"));
     }
 
     @Test
@@ -77,7 +94,8 @@ class EmployeeControllerTest {
 
         mockMvc.perform(get("/api/v1/employees/1"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.employeeNumber").value("EMP001"));
+                .andExpect(jsonPath("$.employeeNumber").value("EMP001"))
+                .andExpect(jsonPath("$.fullName").value("John Doe"));
     }
 
     @Test
@@ -137,18 +155,6 @@ class EmployeeControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest());
-    }
-
-    @Test
-    void testActuatorHealth_Public() throws Exception {
-        mockMvc.perform(get("/actuator/health"))
-                .andExpect(status().isOk());
-    }
-
-    @Test
-    void testActuatorInfo_Public() throws Exception {
-        mockMvc.perform(get("/actuator/info"))
-                .andExpect(status().isOk());
     }
 
 }

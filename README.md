@@ -428,6 +428,16 @@ Integration Tests:
   - Configuration methods may be renamed
 - **Validation:** Update Jackson version, verify ObjectMapper creation and configuration
 
+### Jackson Source-Code Migration Scenario
+
+Spring Boot 3 currently contains custom Jackson 2 integration code using:
+
+- `com.fasterxml.jackson.*`
+- `@JsonComponent`
+- `Jackson2ObjectMapperBuilderCustomizer`
+
+These APIs are intentionally included so the Spring Boot 4 migration can demonstrate real Java source-code changes required for Jackson 3 compatibility.
+
 ### 8. **Database Drivers**
 
 - **Default runtime:** H2 with a file-based database

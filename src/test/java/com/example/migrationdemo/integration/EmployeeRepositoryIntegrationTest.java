@@ -26,7 +26,7 @@ import static org.junit.jupiter.api.Assertions.*;
  *
  * Note: This test will be skipped if Docker is not available.
  */
-@Testcontainers
+@Testcontainers(disabledWithoutDocker = true)
 @DataJpaTest
 class EmployeeRepositoryIntegrationTest {
 
