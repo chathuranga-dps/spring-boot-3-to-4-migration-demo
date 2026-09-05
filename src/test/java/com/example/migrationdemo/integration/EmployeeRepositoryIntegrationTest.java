@@ -23,6 +23,8 @@ import static org.junit.jupiter.api.Assertions.*;
  * Integration test using Testcontainers for PostgreSQL.
  * This test demonstrates database compatibility and will be important
  * for validating database and Hibernate queries during Spring Boot 4 migration.
+ *
+ * Note: This test will be skipped if Docker is not available.
  */
 @Testcontainers
 @DataJpaTest
@@ -30,9 +32,9 @@ class EmployeeRepositoryIntegrationTest {
 
     @Container
     static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:16")
-        .withDatabaseName("test_db")
-        .withUsername("test_user")
-        .withPassword("test_pass");
+            .withDatabaseName("test_db")
+            .withUsername("test_user")
+            .withPassword("test_pass");
 
     @DynamicPropertySource
     static void configureProperties(DynamicPropertyRegistry registry) {
@@ -52,13 +54,12 @@ class EmployeeRepositoryIntegrationTest {
     @Test
     void testSaveEmployee() {
         Employee employee = new Employee(
-            "EMP001",
-            "John",
-            "Doe",
-            "john@example.com",
-            "Technology",
-            new BigDecimal("85000.00")
-        );
+                "EMP001",
+                "John",
+                "Doe",
+                "john@example.com",
+                "Technology",
+                new BigDecimal("85000.00"));
 
         Employee savedEmployee = employeeRepository.save(employee);
 
@@ -70,13 +71,12 @@ class EmployeeRepositoryIntegrationTest {
     @Test
     void testFindByEmployeeNumber() {
         Employee employee = new Employee(
-            "EMP002",
-            "Jane",
-            "Smith",
-            "jane@example.com",
-            "Finance",
-            new BigDecimal("90000.00")
-        );
+                "EMP002",
+                "Jane",
+                "Smith",
+                "jane@example.com",
+                "Finance",
+                new BigDecimal("90000.00"));
         employeeRepository.save(employee);
 
         Optional<Employee> found = employeeRepository.findByEmployeeNumber("EMP002");
@@ -87,9 +87,12 @@ class EmployeeRepositoryIntegrationTest {
 
     @Test
     void testFindByDepartmentIgnoreCase() {
-        Employee emp1 = new Employee("EMP001", "John", "Doe", "john@example.com", "Technology", new BigDecimal("85000.00"));
-        Employee emp2 = new Employee("EMP002", "Jane", "Smith", "jane@example.com", "Technology", new BigDecimal("90000.00"));
-        Employee emp3 = new Employee("EMP003", "Mike", "Brown", "mike@example.com", "Finance", new BigDecimal("80000.00"));
+        Employee emp1 = new Employee("EMP001", "John", "Doe", "john@example.com", "Technology",
+                new BigDecimal("85000.00"));
+        Employee emp2 = new Employee("EMP002", "Jane", "Smith", "jane@example.com", "Technology",
+                new BigDecimal("90000.00"));
+        Employee emp3 = new Employee("EMP003", "Mike", "Brown", "mike@example.com", "Finance",
+                new BigDecimal("80000.00"));
 
         employeeRepository.save(emp1);
         employeeRepository.save(emp2);
@@ -102,13 +105,16 @@ class EmployeeRepositoryIntegrationTest {
 
     @Test
     void testFindActiveEmployeesByDepartment() {
-        Employee emp1 = new Employee("EMP001", "John", "Doe", "john@example.com", "Technology", new BigDecimal("85000.00"));
+        Employee emp1 = new Employee("EMP001", "John", "Doe", "john@example.com", "Technology",
+                new BigDecimal("85000.00"));
         emp1.setActive(true);
 
-        Employee emp2 = new Employee("EMP002", "Jane", "Smith", "jane@example.com", "Technology", new BigDecimal("90000.00"));
+        Employee emp2 = new Employee("EMP002", "Jane", "Smith", "jane@example.com", "Technology",
+                new BigDecimal("90000.00"));
         emp2.setActive(false);
 
-        Employee emp3 = new Employee("EMP003", "Mike", "Brown", "mike@example.com", "Finance", new BigDecimal("80000.00"));
+        Employee emp3 = new Employee("EMP003", "Mike", "Brown", "mike@example.com", "Finance",
+                new BigDecimal("80000.00"));
         emp3.setActive(true);
 
         employeeRepository.save(emp1);
@@ -127,13 +133,16 @@ class EmployeeRepositoryIntegrationTest {
 
     @Test
     void testFindHighEarners() {
-        Employee emp1 = new Employee("EMP001", "John", "Doe", "john@example.com", "Technology", new BigDecimal("95000.00"));
+        Employee emp1 = new Employee("EMP001", "John", "Doe", "john@example.com", "Technology",
+                new BigDecimal("95000.00"));
         emp1.setActive(true);
 
-        Employee emp2 = new Employee("EMP002", "Jane", "Smith", "jane@example.com", "Finance", new BigDecimal("75000.00"));
+        Employee emp2 = new Employee("EMP002", "Jane", "Smith", "jane@example.com", "Finance",
+                new BigDecimal("75000.00"));
         emp2.setActive(true);
 
-        Employee emp3 = new Employee("EMP003", "Mike", "Brown", "mike@example.com", "Technology", new BigDecimal("88000.00"));
+        Employee emp3 = new Employee("EMP003", "Mike", "Brown", "mike@example.com", "Technology",
+                new BigDecimal("88000.00"));
         emp3.setActive(true);
 
         employeeRepository.save(emp1);

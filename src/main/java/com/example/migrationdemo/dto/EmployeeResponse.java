@@ -20,8 +20,8 @@ public class EmployeeResponse {
     }
 
     public EmployeeResponse(Long id, String employeeNumber, String firstName, String lastName,
-                            String email, String department, BigDecimal salary, Boolean active,
-                            LocalDateTime createdAt, LocalDateTime updatedAt) {
+            String email, String department, BigDecimal salary, Boolean active,
+            LocalDateTime createdAt, LocalDateTime updatedAt) {
         this.id = id;
         this.employeeNumber = employeeNumber;
         this.firstName = firstName;

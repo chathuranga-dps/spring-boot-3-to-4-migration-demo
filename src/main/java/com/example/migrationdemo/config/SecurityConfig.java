@@ -16,8 +16,10 @@ import org.springframework.security.web.SecurityFilterChain;
 /**
  * MIGRATION-DEMO:
  * Spring Security configuration using Spring Security 6.x APIs.
- * During Spring Boot 4 migration, Spring Security 7.x compatibility will be validated.
- * The API may change, deprecations will be removed, and new security patterns may be introduced.
+ * During Spring Boot 4 migration, Spring Security 7.x compatibility will be
+ * validated.
+ * The API may change, deprecations will be removed, and new security patterns
+ * may be introduced.
  */
 @Configuration
 @EnableWebSecurity
@@ -26,14 +28,13 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-            .csrf(csrf -> csrf.disable())  // Disable CSRF for stateless REST API demo
-            .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/actuator/health").permitAll()
-                .requestMatchers("/actuator/info").permitAll()
-                .requestMatchers("/api/**").authenticated()
-                .anyRequest().permitAll()
-            )
-            .httpBasic(Customizer.withDefaults());  // Enable HTTP Basic authentication
+                .csrf(csrf -> csrf.disable()) // Disable CSRF for stateless REST API demo
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/actuator/health").permitAll()
+                        .requestMatchers("/actuator/info").permitAll()
+                        .requestMatchers("/api/**").authenticated()
+                        .anyRequest().permitAll())
+                .httpBasic(Customizer.withDefaults()); // Enable HTTP Basic authentication
 
         return http.build();
     }
@@ -41,10 +42,10 @@ public class SecurityConfig {
     @Bean
     public UserDetailsService userDetailsService(PasswordEncoder passwordEncoder) {
         UserDetails demoUser = User.builder()
-            .username("demo")
-            .password(passwordEncoder.encode("demo123"))
-            .roles("USER")
-            .build();
+                .username("demo")
+                .password(passwordEncoder.encode("demo123"))
+                .roles("USER")
+                .build();
 
         return new InMemoryUserDetailsManager(demoUser);
     }

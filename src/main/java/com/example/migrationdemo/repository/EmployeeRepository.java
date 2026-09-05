@@ -22,11 +22,11 @@ public interface EmployeeRepository extends JpaRepository<Employee, Long> {
      * during Spring Boot 4 migration.
      */
     @Query("""
-           select e
-           from Employee e
-           where lower(e.department) = lower(:department)
-           and e.active = true
-           """)
+            select e
+            from Employee e
+            where lower(e.department) = lower(:department)
+            and e.active = true
+            """)
     List<Employee> findActiveEmployeesByDepartment(
             @Param("department") String department);
 
@@ -34,16 +34,13 @@ public interface EmployeeRepository extends JpaRepository<Employee, Long> {
      * MIGRATION-DEMO: Native PostgreSQL query that will be validated for
      * database compatibility during Spring Boot 4 migration.
      */
-    @Query(
-        value = """
+    @Query(value = """
             select *
             from employees
             where salary > :salary
             and active = true
             order by salary desc
-            """,
-        nativeQuery = true
-    )
+            """, nativeQuery = true)
     List<Employee> findHighEarners(
             @Param("salary") BigDecimal salary);
 

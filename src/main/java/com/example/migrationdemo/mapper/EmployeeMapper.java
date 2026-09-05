@@ -10,28 +10,26 @@ public class EmployeeMapper {
 
     public Employee toEntity(EmployeeCreateRequest request) {
         return new Employee(
-            request.getEmployeeNumber(),
-            request.getFirstName(),
-            request.getLastName(),
-            request.getEmail(),
-            request.getDepartment(),
-            request.getSalary()
-        );
+                request.getEmployeeNumber(),
+                request.getFirstName(),
+                request.getLastName(),
+                request.getEmail(),
+                request.getDepartment(),
+                request.getSalary());
     }
 
     public EmployeeResponse toResponse(Employee employee) {
         return new EmployeeResponse(
-            employee.getId(),
-            employee.getEmployeeNumber(),
-            employee.getFirstName(),
-            employee.getLastName(),
-            employee.getEmail(),
-            employee.getDepartment(),
-            employee.getSalary(),
-            employee.getActive(),
-            employee.getCreatedAt(),
-            employee.getUpdatedAt()
-        );
+                employee.getId(),
+                employee.getEmployeeNumber(),
+                employee.getFirstName(),
+                employee.getLastName(),
+                employee.getEmail(),
+                employee.getDepartment(),
+                employee.getSalary(),
+                employee.getActive(),
+                employee.getCreatedAt(),
+                employee.getUpdatedAt());
     }
 
     public void updateEntityFromRequest(EmployeeResponse response, Employee employee) {

@@ -9,7 +9,8 @@ import org.springframework.context.annotation.Configuration;
 /**
  * MIGRATION-DEMO:
  * This Jackson 2 configuration is intentionally included so that
- * Jackson-related changes can be demonstrated during the Spring Boot 4 migration.
+ * Jackson-related changes can be demonstrated during the Spring Boot 4
+ * migration.
  *
  * Jackson 2.x is part of Spring Boot 3.x.
  * Spring Boot 4 will include Jackson 3.x, which has breaking API changes.
@@ -29,8 +30,7 @@ public class JacksonConfig {
 
         // Do not serialize null values
         mapper.setDefaultPropertyInclusion(
-            com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL
-        );
+                com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL);
 
         // Disable pretty printing for production
         mapper.disable(SerializationFeature.INDENT_OUTPUT);

@@ -46,22 +46,22 @@ public class EmployeeService {
     @Transactional(readOnly = true)
     public List<EmployeeResponse> getAllEmployees() {
         return employeeRepository.findAll()
-            .stream()
-            .map(employeeMapper::toResponse)
-            .collect(Collectors.toList());
+                .stream()
+                .map(employeeMapper::toResponse)
+                .collect(Collectors.toList());
     }
 
     @Transactional(readOnly = true)
     public EmployeeResponse getEmployeeById(Long id) {
         Employee employee = employeeRepository.findById(id)
-            .orElseThrow(() -> new EmployeeNotFoundException(id));
+                .orElseThrow(() -> new EmployeeNotFoundException(id));
         return employeeMapper.toResponse(employee);
     }
 
     @Transactional
     public EmployeeResponse updateEmployee(Long id, EmployeeUpdateRequest request) {
         Employee employee = employeeRepository.findById(id)
-            .orElseThrow(() -> new EmployeeNotFoundException(id));
+                .orElseThrow(() -> new EmployeeNotFoundException(id));
 
         // Check for duplicate email if email is being updated
         if (request.getEmail() != null && !request.getEmail().equals(employee.getEmail())) {
@@ -97,32 +97,32 @@ public class EmployeeService {
     @Transactional
     public void deleteEmployee(Long id) {
         Employee employee = employeeRepository.findById(id)
-            .orElseThrow(() -> new EmployeeNotFoundException(id));
+                .orElseThrow(() -> new EmployeeNotFoundException(id));
         employeeRepository.delete(employee);
     }
 
     @Transactional(readOnly = true)
     public List<EmployeeResponse> searchByDepartment(String department) {
         return employeeRepository.findByDepartmentIgnoreCase(department)
-            .stream()
-            .map(employeeMapper::toResponse)
-            .collect(Collectors.toList());
+                .stream()
+                .map(employeeMapper::toResponse)
+                .collect(Collectors.toList());
     }
 
     @Transactional(readOnly = true)
     public List<EmployeeResponse> findActiveEmployeesByDepartment(String department) {
         return employeeRepository.findActiveEmployeesByDepartment(department)
-            .stream()
-            .map(employeeMapper::toResponse)
-            .collect(Collectors.toList());
+                .stream()
+                .map(employeeMapper::toResponse)
+                .collect(Collectors.toList());
     }
 
     @Transactional(readOnly = true)
     public List<EmployeeResponse> findHighEarners(BigDecimal salary) {
         return employeeRepository.findHighEarners(salary)
-            .stream()
-            .map(employeeMapper::toResponse)
-            .collect(Collectors.toList());
+                .stream()
+                .map(employeeMapper::toResponse)
+                .collect(Collectors.toList());
     }
 
 }

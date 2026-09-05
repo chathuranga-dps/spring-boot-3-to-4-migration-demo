@@ -5,6 +5,7 @@
 This project demonstrates a **Spring Boot 3.5.x baseline** application that is intentionally architected to showcase the migration path from Spring Boot 3 to Spring Boot 4. The application includes realistic components, dependencies, and configurations that will require validation or changes during the migration process.
 
 The goal is **NOT** to show breaking changes, but rather to demonstrate:
+
 - Platform modernization
 - Version compatibility validation
 - Ecosystem changes in the Spring Boot 4 environment
@@ -46,6 +47,7 @@ Configuration             → Security, Jackson, Actuator, DataSource
 ## Technology Stack
 
 ### Core Framework
+
 - **Spring Boot 3.5.x** (parent)
 - **Spring Framework 6.x**
 - **Spring Data JPA** with Hibernate 6.x
@@ -53,38 +55,45 @@ Configuration             → Security, Jackson, Actuator, DataSource
 - **Spring Boot Actuator** (for health checks and metrics)
 
 ### Data Access
+
 - **Hibernate 6.x** ORM
-- **Jakarta Persistence** (jakarta.persistence.*)
+- **Jakarta Persistence** (jakarta.persistence.\*)
 - **PostgreSQL 16** (via Docker Compose)
 
 ### Serialization
-- **Jackson 2.x** (com.fasterxml.jackson.*)
+
+- **Jackson 2.x** (com.fasterxml.jackson.\*)
 - **Custom JacksonConfig** demonstrating Boot 3 / Jackson 2 APIs
 
 ### Testing
+
 - **JUnit 5** with Mockito
 - **Spring Boot Test** (MockMvc for controller tests)
 - **Testcontainers** with PostgreSQL container for integration testing
 
 ### Deployment
+
 - **Docker** with Java 17 base image (eclipse-temurin:17-jre)
 - **Docker Compose** for PostgreSQL + application orchestration
 
 ## Prerequisites
 
 ### Local Development
+
 - Java 17+ installed (JDK)
 - Maven 3.8.1+
 - Docker and Docker Compose
 - PostgreSQL 16 (or use Docker Compose)
 
 ### Verify Java Installation
+
 ```bash
 java -version
 javac -version
 ```
 
 ### Verify Maven Installation
+
 ```bash
 mvn -version
 ```
@@ -92,17 +101,21 @@ mvn -version
 ## Starting PostgreSQL
 
 ### Option 1: Docker Compose (Recommended)
+
 ```bash
 docker-compose up -d
 ```
 
 This starts PostgreSQL 16 on port 5432:
+
 - Database: `employee_db`
 - Username: `postgres`
 - Password: `postgres`
 
 ### Option 2: Local PostgreSQL
+
 If you have PostgreSQL installed locally, create the database:
+
 ```sql
 CREATE DATABASE employee_db;
 ```
@@ -110,11 +123,13 @@ CREATE DATABASE employee_db;
 ## Building the Application
 
 ### Build with Tests
+
 ```bash
 mvn clean verify
 ```
 
 This command:
+
 - Cleans the previous build
 - Compiles source code
 - Runs unit tests
@@ -122,11 +137,13 @@ This command:
 - Verifies the build
 
 ### Build Without Tests (Faster)
+
 ```bash
 mvn clean package -DskipTests
 ```
 
 ### View Dependency Tree (Important for Migration)
+
 ```bash
 # MIGRATION-DEMO: This shows Spring Boot managed versions
 mvn dependency:tree | head -50
@@ -135,6 +152,7 @@ mvn dependency:tree | head -50
 ## Running the Application
 
 ### Option 1: Maven Spring Boot Plugin
+
 ```bash
 mvn spring-boot:run
 ```
@@ -142,16 +160,19 @@ mvn spring-boot:run
 The application will start on `http://localhost:8080`
 
 ### Option 2: Java Command (After Building)
+
 ```bash
 java -jar target/spring-boot-migration-demo-1.0.0.jar
 ```
 
 ### Verify Application is Running
+
 ```bash
 curl http://localhost:8080/actuator/health
 ```
 
 Expected response:
+
 ```json
 {
   "status": "UP",
@@ -181,6 +202,7 @@ Role:    USER
 ```
 
 ### Example Authenticated Request
+
 ```bash
 curl -u demo:demo123 http://localhost:8080/api/v1/employees
 ```
@@ -190,6 +212,7 @@ curl -u demo:demo123 http://localhost:8080/api/v1/employees
 All `/api/**` endpoints require authentication.
 
 ### Create Employee
+
 ```http
 POST /api/v1/employees
 Content-Type: application/json
@@ -208,6 +231,7 @@ Authorization: Basic demo:demo123
 Response: `201 Created`
 
 ### List All Employees
+
 ```http
 GET /api/v1/employees
 Authorization: Basic demo:demo123
@@ -216,6 +240,7 @@ Authorization: Basic demo:demo123
 Response: `200 OK`
 
 ### Get Single Employee
+
 ```http
 GET /api/v1/employees/{id}
 Authorization: Basic demo:demo123
@@ -224,6 +249,7 @@ Authorization: Basic demo:demo123
 Response: `200 OK` or `404 Not Found`
 
 ### Update Employee
+
 ```http
 PUT /api/v1/employees/{id}
 Content-Type: application/json
@@ -239,6 +265,7 @@ Authorization: Basic demo:demo123
 Response: `200 OK`
 
 ### Delete Employee
+
 ```http
 DELETE /api/v1/employees/{id}
 Authorization: Basic demo:demo123
@@ -247,6 +274,7 @@ Authorization: Basic demo:demo123
 Response: `204 No Content`
 
 ### Search by Department (JPQL Query)
+
 ```http
 GET /api/v1/employees/search?department=Technology
 Authorization: Basic demo:demo123
@@ -255,6 +283,7 @@ Authorization: Basic demo:demo123
 Response: `200 OK` - Returns matching employees
 
 ### Find High Earners (Native SQL Query)
+
 ```http
 GET /api/v1/employees/high-earners?salary=90000
 Authorization: Basic demo:demo123
@@ -265,6 +294,7 @@ Response: `200 OK` - Returns employees with salary > 90000
 ## Example Requests
 
 ### Using curl
+
 ```bash
 # Create employee
 curl -X POST http://localhost:8080/api/v1/employees \
@@ -290,6 +320,7 @@ curl -u demo:demo123 "http://localhost:8080/api/v1/employees/high-earners?salary
 ```
 
 ### Using Postman
+
 1. Create a new request collection
 2. Set Authorization type to "Basic Auth"
 3. Enter username: `demo` and password: `demo123`
@@ -298,11 +329,13 @@ curl -u demo:demo123 "http://localhost:8080/api/v1/employees/high-earners?salary
 ## Running Tests
 
 ### Run All Tests
+
 ```bash
 mvn test
 ```
 
 ### Run Specific Test Class
+
 ```bash
 mvn test -Dtest=EmployeeMapperTest
 mvn test -Dtest=EmployeeServiceTest
@@ -311,11 +344,13 @@ mvn test -Dtest=EmployeeRepositoryIntegrationTest
 ```
 
 ### Run Tests with Coverage Report
+
 ```bash
 mvn test jacoco:report
 ```
 
 ### Test Results
+
 ```
 Unit Tests:
   - EmployeeMapperTest
@@ -331,27 +366,32 @@ Integration Tests:
 ## Migration Areas to Demonstrate
 
 ### 1. **Spring Boot Version Upgrade** (3.5.x → 4.x)
+
 - **Current:** Spring Boot 3.5.x in `pom.xml` parent
 - **Future:** Spring Boot 4.x
 - **Validation:** Parent version change, then verify dependency compatibility
 
 ### 2. **Java Version Upgrade** (17 → 21)
+
 - **Current:** Java 17 in `pom.xml` properties and `Dockerfile`
 - **Future:** Java 21
 - **Validation:** Update `<java.version>21</java.version>` and Docker image, recompile
 
 ### 3. **Spring Framework Version** (6.x → 7.x)
+
 - **Current:** Spring Framework 6.x (managed by Boot 3 parent)
 - **Future:** Spring Framework 7.x (managed by Boot 4 parent)
 - **Validation:** Removed/deprecated API checks, see `config/SecurityConfig.java`
 
 ### 4. **Spring Security Version** (6.x → 7.x)
+
 - **Location:** `config/SecurityConfig.java`
 - **Current:** Spring Security 6.x API (SecurityFilterChain, authorizeHttpRequests)
 - **Future:** Spring Security 7.x
 - **Migration Note:** API is stable; validation ensures no deprecated methods
 
 ### 5. **Hibernate ORM Version** (6.x → 7.x)
+
 - **Current:** Hibernate 6.x (managed by Spring Boot 3)
 - **Validation Areas:** `repository/EmployeeRepository.java`
   - JPQL query: `findActiveEmployeesByDepartment()` with string interpolation
@@ -359,11 +399,13 @@ Integration Tests:
 - **Future:** Hibernate 7.x compatibility
 
 ### 6. **Jakarta Persistence** (6.0+ → Latest)
+
 - **Current:** `jakarta.persistence.*` in `entity/Employee.java`
 - **Package:** Already using Jakarta (not legacy javax.persistence)
 - **Validation:** Entity annotations, @GeneratedValue, @PrePersist, @PreUpdate
 
 ### 7. **Jackson Serialization** (2.x → 3.x) 🔴 MAJOR CHANGE
+
 - **Location:** `config/JacksonConfig.java`
 - **Current:** `com.fasterxml.jackson.databind.ObjectMapper` (Jackson 2)
 - **Future:** Jackson 3.x with breaking API changes
@@ -374,6 +416,7 @@ Integration Tests:
 - **Validation:** Update Jackson version, verify ObjectMapper creation and configuration
 
 ### 8. **PostgreSQL JDBC Driver**
+
 - **Current:** Version managed by Spring Boot 3 parent
 - **Future:** Version managed by Spring Boot 4 parent
 - **Dependency:** `org.postgresql:postgresql`
@@ -381,22 +424,26 @@ Integration Tests:
 - **Note:** PostgreSQL Server (16) does NOT need to be upgraded just because Spring Boot is upgraded
 
 ### 9. **Web Framework** (Spring Web Starter)
+
 - **Location:** `pom.xml` and `controller/EmployeeController.java`
 - **Current:** Spring Boot 3 web starter + Tomcat 10.x
 - **Future:** Spring Boot 4 may have different Servlet/Tomcat structure
 - **Validation:** REST endpoints continue to work as expected
 
 ### 10. **Tomcat Servlet Container** (10.x → 11.x)
+
 - **Current:** Tomcat 10.x (managed by Spring Boot 3)
 - **Future:** Tomcat 11.x (managed by Spring Boot 4)
 - **Impact:** Usually transparent; tested through integration tests
 
 ### 11. **Actuator Health Endpoints**
+
 - **Location:** `health/DatabaseHealthIndicator.java`
 - **Current:** Custom health indicator with Boot 3 Actuator
 - **Validation:** Ensure `/actuator/health` continues to work
 
 ### 12. **Testing Framework** (JUnit 5 + Testcontainers)
+
 - **Current:** JUnit 5 + Mockito + Testcontainers
 - **Future:** Spring Boot 4 test stack
 - **Validation:** Unit, controller, and integration tests must pass
@@ -405,18 +452,18 @@ Integration Tests:
 
 ## Spring Boot 3 → 4 Migration Roadmap
 
-| Area | Current Demo | Future Target | Migration Consideration |
-|------|-------------|----------------|------------------------|
-| **Spring Boot** | 3.5.x | 4.x | Major platform upgrade |
-| **Java** | 17 | 21 | JDK, CI/CD pipelines, Docker images |
-| **Spring Framework** | 6.x | 7.x | Removed/deprecated APIs |
-| **Spring Security** | 6.x | 7.x | Security authentication/authorization |
-| **Hibernate ORM** | 6.x | 7.x | JPQL queries, native queries, entity mappings |
-| **Jackson** | 2.x | 3.x | JSON serialization, ObjectMapper API changes |
-| **Tomcat** | 10.x | 11.x | Servlet compatibility |
-| **PostgreSQL JDBC** | Boot 3 managed | Boot 4 managed | Driver version compatibility |
-| **Web Starter** | spring-boot-starter-web | Boot 4 variant | Controller, REST endpoint structure |
-| **Tests** | Boot 3 + JUnit 5 | Boot 4 + JUnit 5 | Test compatibility |
+| Area                 | Current Demo            | Future Target    | Migration Consideration                       |
+| -------------------- | ----------------------- | ---------------- | --------------------------------------------- |
+| **Spring Boot**      | 3.5.x                   | 4.x              | Major platform upgrade                        |
+| **Java**             | 17                      | 21               | JDK, CI/CD pipelines, Docker images           |
+| **Spring Framework** | 6.x                     | 7.x              | Removed/deprecated APIs                       |
+| **Spring Security**  | 6.x                     | 7.x              | Security authentication/authorization         |
+| **Hibernate ORM**    | 6.x                     | 7.x              | JPQL queries, native queries, entity mappings |
+| **Jackson**          | 2.x                     | 3.x              | JSON serialization, ObjectMapper API changes  |
+| **Tomcat**           | 10.x                    | 11.x             | Servlet compatibility                         |
+| **PostgreSQL JDBC**  | Boot 3 managed          | Boot 4 managed   | Driver version compatibility                  |
+| **Web Starter**      | spring-boot-starter-web | Boot 4 variant   | Controller, REST endpoint structure           |
+| **Tests**            | Boot 3 + JUnit 5        | Boot 4 + JUnit 5 | Test compatibility                            |
 
 ---
 
@@ -427,24 +474,29 @@ This section describes the intended presentation sequence to demonstrate the mig
 ### Phase 1: Demonstrate Current Baseline (Boot 3 Working)
 
 1. **Start PostgreSQL**
+
    ```bash
    docker-compose up -d
    ```
 
 2. **Build the Application**
+
    ```bash
    mvn clean verify
    ```
+
    - All unit tests pass ✅
    - All controller tests pass ✅
    - All integration tests pass ✅
 
 3. **Start the Application**
+
    ```bash
    mvn spring-boot:run
    ```
 
 4. **Create an Employee**
+
    ```bash
    curl -X POST http://localhost:8080/api/v1/employees \
      -H "Content-Type: application/json" \
@@ -460,23 +512,27 @@ This section describes the intended presentation sequence to demonstrate the mig
    ```
 
 5. **Retrieve the Employee**
+
    ```bash
    curl -u demo:demo123 http://localhost:8080/api/v1/employees/1
    ```
 
 6. **Show Current Versions**
+
    ```bash
    java -version
    # Output: openjdk version "17.x.x" ...
-   
+
    mvn -v
    # Output: Apache Maven 3.8.x ...
    ```
 
 7. **Show Spring Boot and Dependency Versions**
+
    ```bash
    mvn dependency:tree | grep "spring-boot-starter-\|postgresql\|jackson\|hibernate"
    ```
+
    - Spring Boot: 3.5.0
    - PostgreSQL JDBC: Boot 3 managed version
    - Jackson: 2.x
@@ -486,6 +542,7 @@ This section describes the intended presentation sequence to demonstrate the mig
    ```bash
    curl http://localhost:8080/actuator/health | jq .
    ```
+
    - Status: UP
    - Database: UP
    - All components healthy ✅
@@ -495,6 +552,7 @@ This section describes the intended presentation sequence to demonstrate the mig
 ### Phase 2: Migration Preparation (Change Dependencies)
 
 9. **Stop Application**
+
    ```bash
    Ctrl+C
    ```
@@ -510,6 +568,7 @@ This section describes the intended presentation sequence to demonstrate the mig
     ```bash
     mvn clean compile
     ```
+
     - Expected: Compilation errors or warnings related to:
       - Jackson API changes (if Jackson 3.x is included)
       - Spring Security API changes (if minor breaking changes)
@@ -532,6 +591,7 @@ This section describes the intended presentation sequence to demonstrate the mig
     ```bash
     mvn clean verify
     ```
+
     - All tests must pass
     - Zero compilation errors
 
@@ -540,32 +600,39 @@ This section describes the intended presentation sequence to demonstrate the mig
 ### Phase 4: Validate Migrated Application
 
 16. **Rebuild Application**
+
     ```bash
     mvn clean package
     ```
 
 17. **Start Migrated Application**
+
     ```bash
     mvn spring-boot:run
     ```
 
 18. **Verify Same API Endpoint Works**
+
     ```bash
     curl -u demo:demo123 http://localhost:8080/api/v1/employees/1
     ```
+
     - Returns: Same employee data as before ✅
     - Business logic unchanged ✅
 
 19. **Verify Actuator Health**
+
     ```bash
     curl http://localhost:8080/actuator/health | jq .
     ```
+
     - Status: UP ✅
 
 20. **Run All Tests One More Time**
     ```bash
     mvn test
     ```
+
     - All tests pass ✅
 
 ---
@@ -573,10 +640,11 @@ This section describes the intended presentation sequence to demonstrate the mig
 ### Key Message to Management
 
 > **The goal of the migration is NOT to change business functionality.**
-> 
+>
 > **The goal is to modernize the technology platform while proving that existing business behavior remains unchanged.**
 
 > **Spring Boot 4 migration is an ecosystem upgrade, not merely a version-number change.**
+>
 > - Dependencies are managed by the new parent POM
 > - Framework APIs may change (Spring Framework 7.x)
 > - Database libraries are auto-managed (PostgreSQL driver)
@@ -590,17 +658,21 @@ This section describes the intended presentation sequence to demonstrate the mig
 ## Building Docker Image
 
 ### Build the JAR First
+
 ```bash
 mvn clean package
 ```
 
 ### Build Docker Image
+
 ```bash
 docker build -t spring-boot-migration-demo:1.0.0 .
 ```
 
 ### Run Application with Docker Compose
+
 Uncomment the `application` service in `docker-compose.yml`, then:
+
 ```bash
 docker-compose up
 ```
@@ -610,11 +682,13 @@ docker-compose up
 ## Stopping Services
 
 ### Stop PostgreSQL (Docker Compose)
+
 ```bash
 docker-compose down
 ```
 
 ### Stop Application
+
 ```bash
 Ctrl+C
 ```
@@ -624,18 +698,22 @@ Ctrl+C
 ## Troubleshooting
 
 ### Connection Refused on Port 5432
+
 - Ensure PostgreSQL is running: `docker-compose up -d`
 - Check status: `docker-compose ps`
 
 ### Unauthorized Errors (401)
+
 - Use correct credentials: `-u demo:demo123`
 - Or use: `Authorization: Basic ZGVtbzpkZW1vMTIz` header
 
 ### Test Failures
+
 - Ensure PostgreSQL is running for integration tests
 - Check logs: `mvn test -X` for debug output
 
 ### Maven Build Failures
+
 - Clear Maven cache: `rm -rf ~/.m2/repository`
 - Try again: `mvn clean install`
 

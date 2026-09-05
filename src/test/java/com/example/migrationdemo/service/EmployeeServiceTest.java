@@ -39,13 +39,12 @@ class EmployeeServiceTest {
     void testGetEmployeeById_Success() {
         Long employeeId = 1L;
         Employee employee = new Employee(
-            "EMP001",
-            "John",
-            "Doe",
-            "john@example.com",
-            "Technology",
-            new BigDecimal("85000.00")
-        );
+                "EMP001",
+                "John",
+                "Doe",
+                "john@example.com",
+                "Technology",
+                new BigDecimal("85000.00"));
         employee.setId(employeeId);
 
         when(employeeRepository.findById(employeeId)).thenReturn(Optional.of(employee));
@@ -70,16 +69,15 @@ class EmployeeServiceTest {
     @Test
     void testCreateEmployee_DuplicateEmployeeNumber() {
         EmployeeCreateRequest request = new EmployeeCreateRequest(
-            "EMP001",
-            "John",
-            "Doe",
-            "john@example.com",
-            "Technology",
-            new BigDecimal("85000.00")
-        );
+                "EMP001",
+                "John",
+                "Doe",
+                "john@example.com",
+                "Technology",
+                new BigDecimal("85000.00"));
 
         when(employeeRepository.findByEmployeeNumber("EMP001"))
-            .thenReturn(Optional.of(new Employee()));
+                .thenReturn(Optional.of(new Employee()));
 
         assertThrows(DuplicateEmployeeException.class, () -> {
             employeeService.createEmployee(request);

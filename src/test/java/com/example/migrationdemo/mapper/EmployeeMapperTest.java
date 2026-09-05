@@ -22,13 +22,12 @@ class EmployeeMapperTest {
     @Test
     void testToEntity() {
         EmployeeCreateRequest request = new EmployeeCreateRequest(
-            "EMP001",
-            "John",
-            "Doe",
-            "john@example.com",
-            "Technology",
-            new BigDecimal("85000.00")
-        );
+                "EMP001",
+                "John",
+                "Doe",
+                "john@example.com",
+                "Technology",
+                new BigDecimal("85000.00"));
 
         Employee employee = employeeMapper.toEntity(request);
 
@@ -43,13 +42,12 @@ class EmployeeMapperTest {
     @Test
     void testToResponse() {
         Employee employee = new Employee(
-            "EMP002",
-            "Jane",
-            "Smith",
-            "jane@example.com",
-            "Finance",
-            new BigDecimal("90000.00")
-        );
+                "EMP002",
+                "Jane",
+                "Smith",
+                "jane@example.com",
+                "Finance",
+                new BigDecimal("90000.00"));
 
         EmployeeResponse response = employeeMapper.toResponse(employee);
 

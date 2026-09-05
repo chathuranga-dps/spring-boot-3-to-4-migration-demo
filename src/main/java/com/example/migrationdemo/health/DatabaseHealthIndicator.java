@@ -20,16 +20,16 @@ public class DatabaseHealthIndicator implements HealthIndicator {
         try (Connection connection = dataSource.getConnection()) {
             if (connection != null && !connection.isClosed()) {
                 return Health.up()
-                    .withDetail("database", "PostgreSQL")
-                    .withDetail("status", "Connected")
-                    .build();
+                        .withDetail("database", "PostgreSQL")
+                        .withDetail("status", "Connected")
+                        .build();
             }
         } catch (Exception e) {
             return Health.down()
-                .withDetail("database", "PostgreSQL")
-                .withDetail("status", "Connection failed")
-                .withException(e)
-                .build();
+                    .withDetail("database", "PostgreSQL")
+                    .withDetail("status", "Connection failed")
+                    .withException(e)
+                    .build();
         }
         return Health.unknown().build();
     }
