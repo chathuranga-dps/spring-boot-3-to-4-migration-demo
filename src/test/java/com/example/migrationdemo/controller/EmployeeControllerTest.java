@@ -40,8 +40,6 @@ class EmployeeControllerTest {
 
     @Test
     void testGetAllEmployees_Success() throws Exception {
-        mockMvc.perform(get("/api/v1/employees")
-                .with(httpBasic("demo", "demo123")))
         EmployeeResponse response = new EmployeeResponse(
                 1L,
                 "EMP001",
@@ -56,9 +54,17 @@ class EmployeeControllerTest {
 
         when(employeeService.getAllEmployees()).thenReturn(List.of(response));
 
-        mockMvc.perform(get("/api/v1/employees"))
+        mockMvc.perform(get("/api/v1/employees")
+                .with(httpBasic("demo", "demo123")))
                 .andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON));
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$[0].id").value(1))
+                .andExpect(jsonPath("$[0].employeeNumber").value("EMP001"))
+                .andExpect(jsonPath("$[0].fullName").value("John Smith"))
+                .andExpect(jsonPath("$[0].email").value("john.smith@example.com"))
+                .andExpect(jsonPath("$[0].department").value("Technology"))
+                .andExpect(jsonPath("$[0].salary").value(95000.00))
+                .andExpect(jsonPath("$[0].active").value(true));
     }
 
     @Test
@@ -126,9 +132,9 @@ class EmployeeControllerTest {
                 .with(httpBasic("demo", "demo123")))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.employeeNumber").value("EMP001"))
-                .andExpect(jsonPath("$.fullName").value("John Doe"));
-                .andExpect(jsonPath("$.employeeNumber").value("EMP001"))
-                .andExpect(jsonPath("$.createdAt").isString());
+                .andExpect(jsonPath("$.fullName").value("John Doe"))
+                .andExpect(jsonPath("$.createdAt").doesNotExist())
+                .andExpect(jsonPath("$.updatedAt").doesNotExist());
     }
 
     @Test
@@ -150,8 +156,7 @@ class EmployeeControllerTest {
         mockMvc.perform(get("/api/v1/employees/1")
                 .with(httpBasic("demo", "demo123")))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.department").doesNotExist())
-                .andExpect(jsonPath("$.createdAt").value("2026-09-05T12:30:00"));
+                .andExpect(jsonPath("$.department").doesNotExist());
     }
 
     @Test
