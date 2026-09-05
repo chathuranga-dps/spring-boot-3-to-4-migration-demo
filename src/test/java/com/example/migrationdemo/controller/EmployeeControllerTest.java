@@ -59,6 +59,38 @@ class EmployeeControllerTest {
     }
 
     @Test
+    void testOpenApiDocumentation_Public() throws Exception {
+        mockMvc.perform(get("/v3/api-docs"))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.info.title").value("Employee Management API"))
+                .andExpect(jsonPath("$.info.version").value("1.0"))
+                .andExpect(jsonPath("$.components.securitySchemes.basicAuth.type").value("http"))
+                .andExpect(jsonPath("$.components.securitySchemes.basicAuth.scheme").value("basic"))
+                .andExpect(jsonPath("$.paths['/api/v1/employees'].get.summary")
+                        .value("Get all employees"))
+                .andExpect(jsonPath("$.paths['/api/v1/employees'].post.summary")
+                        .value("Create an employee"))
+                .andExpect(jsonPath("$.paths['/api/v1/employees/{id}'].get.summary")
+                        .value("Get an employee by ID"))
+                .andExpect(jsonPath("$.paths['/api/v1/employees/{id}'].put.summary")
+                        .value("Update an employee"))
+                .andExpect(jsonPath("$.paths['/api/v1/employees/{id}'].delete.summary")
+                        .value("Delete an employee"))
+                .andExpect(jsonPath("$.paths['/api/v1/employees/search'].get.summary")
+                        .value("Search employees by department"))
+                .andExpect(jsonPath("$.paths['/api/v1/employees/high-earners'].get.summary")
+                        .value("Find active employees earning above a salary threshold"));
+    }
+
+    @Test
+    void testSwaggerUi_Public() throws Exception {
+        mockMvc.perform(get("/swagger-ui.html"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/swagger-ui/index.html"));
+    }
+
+    @Test
     void testGetEmployeeById_Success() throws Exception {
         EmployeeResponse response = new EmployeeResponse(
                 1L,

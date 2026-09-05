@@ -19,6 +19,7 @@ migrated application is on the `spring-4` branch.
 - Jackson 3.1.5
 - Tomcat 11.0.24
 - H2 2.4.240
+- springdoc-openapi 3.1.0
 - Spring Boot Actuator
 - Maven
 - JUnit 5, Mockito, and MockMvc
@@ -98,8 +99,32 @@ The following endpoints are public:
 - `GET /actuator/health`
 - `GET /actuator/info`
 - `/h2-console/**`
+- `/swagger-ui/**`
+- `/swagger-ui.html`
+- `/v3/api-docs/**`
 
 All `/api/**` endpoints require authentication.
+
+## Swagger / OpenAPI
+
+- Swagger UI: `http://localhost:8080/swagger-ui.html`
+- OpenAPI JSON: `http://localhost:8080/v3/api-docs`
+- Security scheme: HTTP Basic (`basicAuth`)
+
+Use the **Authorize** button with `demo` / `demo123` to execute protected
+Employee API operations.
+
+```text
+Spring Boot 3:
+springdoc-openapi 2.8.14
+
+Spring Boot 4:
+springdoc-openapi 3.1.0
+```
+
+This is a good example of a third-party framework dependency that must be
+upgraded together with Spring Boot even though the application's business APIs
+do not change.
 
 ## API Endpoints
 
@@ -159,6 +184,7 @@ The test suite covers:
 - Employee mapping
 - Service behavior and duplicate detection
 - Authenticated and unauthenticated MVC requests
+- Public Swagger UI and OpenAPI JSON with documented Employee operations
 - Validation and exception responses
 - Jackson date/time and null-property behavior
 - Public Actuator endpoints
@@ -192,6 +218,7 @@ branches.
 | Jackson Databind | 2.19.0 | 3.1.5 | Jackson 2 to Jackson 3 migration |
 | Tomcat | 10.1.41 | 11.0.24 | Servlet container upgrade |
 | H2 | 2.3.232 | 2.4.240 | Managed database dependency upgrade |
+| springdoc-openapi | 2.8.14 | 3.1.0 | Spring Boot 4 compatibility upgrade |
 | Spring Data JPA | 3.5.0 | 4.1.1 | Data access framework upgrade |
 | Web starter | `spring-boot-starter-web` | `spring-boot-starter-webmvc` | Boot 4 modular starter |
 | Test starters | `spring-boot-starter-test` | MVC and JPA test starters | Boot 4 modular test structure |
@@ -205,6 +232,8 @@ Key technical changes:
 - Updated test annotation packages and replaced `@MockBean` with
   `@MockitoBean`.
 - Added the Boot 4 H2 Console module and Spring Security frame support.
+- Upgraded springdoc-openapi from 2.8.14 to 3.1.0 while preserving the
+  documented API contract and HTTP Basic security scheme.
 - Removed all legacy external-database dependencies and configuration.
 - Migrated repository integration tests to H2.
 - Preserved endpoint paths, authentication credentials, payloads, and response
