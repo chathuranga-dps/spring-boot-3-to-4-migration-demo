@@ -66,6 +66,14 @@
         </dependency>
 
         <!-- H2 database for runtime and tests -->
+        <!-- MIGRATION-DEMO: Spring Boot 3 compatible Swagger/OpenAPI support -->
+        <dependency>
+            <groupId>org.springdoc</groupId>
+            <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+            <version>2.8.14</version>
+        </dependency>
+
+        <!-- H2 database for local runtime and tests -->
         <dependency>
             <groupId>com.h2database</groupId>
             <artifactId>h2</artifactId>
